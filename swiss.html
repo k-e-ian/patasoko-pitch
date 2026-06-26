@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Patasoko, East Africa's Trade Rail</title>
+<meta name="theme-color" content="#FFFFFF"/>
+<meta name="robots" content="noindex, nofollow"/>
+<link rel="icon" type="image/png" href="patasoko-logo-dark.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --sans:"Geist","Helvetica Neue",Arial,sans-serif;
+  --mono:"Geist Mono",ui-monospace,monospace;
+  --ease:cubic-bezier(.22,.7,.3,1);
+}
+html[data-theme="light"]{
+  --bg:#FFFFFF; --ink:#0A0A0A; --muted:#5C5C5C; --faint:#9A9A9A;
+  --hair:rgba(10,10,10,.9); --line:rgba(10,10,10,.16); --grid:rgba(10,10,10,.06);
+  --accent:#1E9E48; --accent2:#15813A; --accent-soft:rgba(30,158,72,.10); --red:#C0392B;
+}
+html[data-theme="dark"]{
+  --bg:#0A0A0A; --ink:#FAFAFA; --muted:#9A9A9A; --faint:#6A6A6A;
+  --hair:rgba(250,250,250,.92); --line:rgba(255,255,255,.20); --grid:rgba(255,255,255,.07);
+  --accent:#4ED36B; --accent2:#3FC55D; --accent-soft:rgba(78,211,107,.13); --red:#FF6F5B;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);font-family:var(--sans);color:var(--ink);transition:background .35s var(--ease)}
+
+.stage{position:fixed;inset:0;display:grid;place-items:center;background:var(--bg)}
+.deck{position:relative;width:1280px;height:720px;transform-origin:center center}
+
+.slide{position:absolute;inset:0;overflow:hidden;background:var(--bg);color:var(--ink);
+  opacity:0;visibility:hidden;transition:opacity .45s var(--ease);z-index:1}
+.slide.is-active{opacity:1;visibility:visible;z-index:2}
+/* the visible Swiss column grid, the signature */
+.slide::before{content:"";position:absolute;left:56px;right:56px;top:0;bottom:0;z-index:0;pointer-events:none;
+  background-image:repeating-linear-gradient(90deg,var(--grid) 0 1px,transparent 1px 99px);
+  -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 8%,#000 92%,transparent 100%);
+  mask-image:linear-gradient(180deg,transparent 0,#000 8%,#000 92%,transparent 100%)}
+
+/* 12-column frame on the same metric as the grid lines */
+.frame{position:relative;z-index:1;height:100%;display:grid;grid-template-columns:repeat(12,1fr);gap:0 20px;
+  grid-auto-rows:min-content;align-content:start;padding:50px 56px 44px}
+
+/* masthead */
+.mh-brand{grid-column:1 / 6;display:flex;align-items:center;gap:13px}
+.mh-brand img{height:28px;width:auto;display:block}
+.mh-sec{grid-column:6 / 10;align-self:center;font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.mh-folio{grid-column:11 / 13;align-self:center;text-align:right;font-family:var(--mono);font-size:12px;letter-spacing:.05em;color:var(--faint)}
+.mh-folio b{color:var(--accent)}
+.rule{grid-column:1 / 13;height:2px;background:var(--hair);margin:13px 0 0}
+.rule.hair{height:1px;background:var(--line)}
+
+/* type */
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}
+.h1{font-weight:800;letter-spacing:-.045em;line-height:.96}
+.h2{font-weight:700;font-size:44px;letter-spacing:-.035em;line-height:1.02}
+.h2 .a{color:var(--accent)}
+.lede{font-weight:400;font-size:17px;line-height:1.55;color:var(--muted)}
+.lede b{color:var(--ink);font-weight:600}
+.tnum{font-variant-numeric:tabular-nums}
+.mono{font-family:var(--mono)}
+
+/* big grid numbers */
+.bignum{font-weight:800;letter-spacing:-.05em;line-height:.84;font-variant-numeric:tabular-nums}
+.bignum.a{color:var(--accent)}
+.bignum.r{color:var(--red)}
+
+/* stat block */
+.stat .lab{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+.stat .num{font-weight:800;font-size:62px;letter-spacing:-.04em;line-height:.9;margin-bottom:14px;font-variant-numeric:tabular-nums}
+.stat .num.r{color:var(--red)}
+.stat .desc{font-size:13.5px;line-height:1.5;color:var(--muted)}
+
+/* step / phase / list rows */
+.kch{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+.wlab{font-weight:700;font-size:30px;letter-spacing:-.03em;margin-bottom:10px}
+.wlab.off{color:var(--muted)}
+.sdesc{font-size:13.5px;color:var(--muted);line-height:1.5}
+.tag{margin-top:10px;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent2);border:1px solid var(--accent);border-radius:2px;padding:4px 9px;display:inline-block}
+.plist{list-style:none;display:flex;flex-direction:column;gap:10px}
+.plist li{font-size:13.5px;color:var(--muted);line-height:1.4;padding-left:16px;position:relative}
+.plist li::before{content:"";position:absolute;left:0;top:7px;width:6px;height:6px;background:var(--accent);border-radius:1px}
+.plist li b{color:var(--ink);font-weight:600}
+
+/* data rows (right-aligned figure) */
+.drow{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)}
+.drow .k{font-size:15px;color:var(--muted)}
+.drow .k small{display:block;font-family:var(--mono);font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:.03em;margin-top:4px}
+.drow .v{font-weight:700;font-size:22px;letter-spacing:-.02em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.drow .v.a{color:var(--accent)} .drow .v.r{color:var(--red)}
+.drow.head{border-top:2px solid var(--hair)}
+
+/* competition */
+.crow{display:grid;grid-template-columns:200px 1fr auto;gap:24px;align-items:center;padding:16px 0;border-bottom:1px solid var(--line)}
+.crow.self{border-bottom-color:var(--accent)}
+.crow .who{font-weight:700;font-size:20px;letter-spacing:-.02em}
+.crow p{font-size:13.5px;color:var(--muted);line-height:1.4}
+.pill{font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;padding:7px 13px;white-space:nowrap}
+.pill.go{background:var(--accent);color:#fff} html[data-theme="dark"] .pill.go{color:#06140c}
+.pill.mute{border:1px solid var(--line);color:var(--faint)}
+
+/* entrance */
+.up{opacity:0;transform:translateY(14px)}
+.slide.is-active .up{opacity:1;transform:none;transition:opacity .5s var(--ease),transform .5s var(--ease)}
+.slide.is-active .up.d1{transition-delay:.06s}.slide.is-active .up.d2{transition-delay:.12s}
+.slide.is-active .up.d3{transition-delay:.18s}.slide.is-active .up.d4{transition-delay:.24s}
+@media(prefers-reduced-motion:reduce){.up{opacity:1!important;transform:none!important}}
+
+/* chrome / nav */
+.chrome{position:fixed;top:16px;right:18px;z-index:60;display:flex;gap:8px}
+.seg{display:flex;background:var(--bg);border:1px solid var(--line);border-radius:2px;padding:3px;font-family:var(--mono)}
+.seg button{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:11px;letter-spacing:.04em;padding:7px 11px;transition:.18s;font-family:var(--mono);text-transform:uppercase}
+.seg button.on{background:var(--accent);color:#fff;font-weight:600} html[data-theme="dark"] .seg button.on{color:#06140c}
+.nav{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:60;display:flex;align-items:center;gap:14px;background:var(--bg);border:1px solid var(--line);border-radius:2px;padding:7px 12px}
+.nav button{width:30px;height:30px;border-radius:2px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;display:grid;place-items:center;transition:.18s}
+.nav button:hover{border-color:var(--accent);color:var(--accent)}
+.nav .dots{display:flex;gap:5px}
+.nav .dot{width:7px;height:3px;background:var(--line);border:0;padding:0;cursor:pointer;transition:.22s}
+.nav .dot.on{background:var(--accent);width:18px}
+.nav .count{font-family:var(--mono);font-size:11.5px;color:var(--muted);min-width:52px;text-align:center}
+
+@media print{
+  @page{size:1280px 720px;margin:0}
+  html,body{overflow:visible}.chrome,.nav{display:none}
+  .stage{display:block;position:static}.deck{transform:none!important}
+  .slide{position:relative;opacity:1!important;visibility:visible!important;page-break-after:always;break-after:page}
+  .up{opacity:1!important;transform:none!important}
+}
+</style>
+</head>
+<body>
+
+<div class="chrome">
+  <div class="seg" aria-label="Currency"><button data-cur="usd" class="on">USD</button><button data-cur="ksh">KSh</button></div>
+  <div class="seg" aria-label="Theme"><button data-theme-set="light" class="on">Bright</button><button data-theme-set="dark">Dark</button></div>
+</div>
+
+<div class="stage"><div class="deck" id="deck">
+
+  <!-- 01 COVER -->
+  <section class="slide" data-label="Cover">
+    <div class="frame">
+      <div class="mh-brand"><img src="patasoko-logo-dark.png" alt="Patasoko"></div>
+      <div class="mh-folio">Pre-Seed · <b>2026</b></div>
+      <div class="rule"></div>
+      <div class="up" style="grid-column:1 / 9;margin-top:60px"><div class="eyebrow">East Africa's Trade Rail</div></div>
+      <h1 class="h1 up d1 tnum" style="grid-column:1 / 12;font-size:140px;margin-top:18px">Trade<br>Rail<span class="a">.</span></h1>
+      <p class="lede up d2" style="grid-column:1 / 7;margin-top:28px">One platform to source, finance and deliver B2B stock. Supplier-first and asset-light.</p>
+      <div class="up d3" style="grid-column:8 / 13;margin-top:28px">
+        <div class="drow"><span class="k">What we are</span><span class="v" style="font-size:15px;font-weight:600;color:var(--muted)">Supplier-first B2B</span></div>
+        <div class="drow"><span class="k">Beachhead</span><span class="v" style="font-size:15px;font-weight:600;color:var(--muted)">Nairobi, Kenya</span></div>
+        <div class="drow"><span class="k">Raising</span><span class="v a cur" data-usd="$250K" data-ksh="KSh 32M">$250K</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 CHALLENGE -->
+  <section class="slide" data-label="The Challenge">
+    <div class="frame">
+      <div class="mh-brand"><img src="patasoko-logo-dark.png" alt="Patasoko"></div>
+      <div class="mh-sec">The Challenge</div><div class="mh-folio"><b>02</b> / 13</div>
+      <div class="rule"></div>
+      <h2 class="h2 up" style="grid-column:1 / 10;margin-top:30px">Informal trade is huge, but <span class="a">broken.</span></h2>
+      <p class="lede up d1" style="grid-column:1 / 9;margin-top:14px">Kenya's 300,000+ informal retailers lose margin every week to three compounding failures.</p>
+      <div class="rule hair" style="margin-top:30px"></div>
+      <div class="stat up d2" style="grid-column:1 / 5;margin-top:26px"><div class="lab">Time lost</div><div class="num tnum">2-3</div><div class="desc">Days every week sourcing stock from fragmented wholesale markets.</div></div>
+      <div class="stat up d3" style="grid-column:5 / 9;margin-top:26px"><div class="lab">Margin lost</div><div class="num r tnum">15-30%</div><div class="desc">To opaque pricing and broker dependence, with no transparency.</div></div>
+      <div class="stat up d4" style="grid-column:9 / 13;margin-top:26px"><div class="lab">Credit available</div><div class="num r tnum">$0</div><div class="desc">A duka owner with a clean <span class="cur" data-usd="$150" data-ksh="KES 20,000">$150</span> order has nowhere to turn.</div></div>
+    </div>
+  </section>
+
+  <!-- 03 SOLUTION -->
+  <section class="slide" data-label="Our Solution">
+    <div class="frame">
+      <div class="mh-brand"><img src="patasoko-logo-dark.png" alt="Patasoko"></div>
+      <div class="mh-sec">Our Solution</div><div class="mh-folio"><b>03</b> / 13</div>
+      <div class="rule"></div>
+      <h2 class="h2 up" style="grid-column:1 / 10;margin-top:30px">Order. Finance. <span class="a">Deliver.</span></h2>
+      <div class="rule hair" style="margin-top:30px"></div>
+      <div class="up d1" style="grid-column:1 / 5;margin-top:26px"><div class="kch">Step 01</div><div class="wlab">Order</div><div class="sdesc">Source from vetted wholesalers at transparent prices, in minutes.</div></div>
+      <div class="up d2" style="grid-column:5 / 9;margin-top:26px"><div class="kch">Step 02</div><div class="wlab off">Finance</div><span class="tag">Credit, later</span><div class="sdesc" style="margin-top:10px">BNPL activates only once transaction data underwrites it well.</div></div>
+      <div class="up d3" style="grid-column:9 / 13;margin-top:26px"><div class="kch">Step 03</div><div class="wlab">Deliver</div><div class="sdesc">Asset-light partner logistics, same or next day.</div></div>
+      <p class="lede up d4" style="grid-column:1 / 10;margin-top:34px"><b>Finance follows the data, not the other way around.</b></p>
+    </div>
+  </section>
+
+  <!-- 04 HOW IT WORKS -->
+  <section class="slide" data-label="How It Works">
+    <div class="frame">
+      <div class="mh-brand"><img src="patasoko-logo-dark.png" alt="Patasoko"></div>
+      <div class="mh-sec">How It Works</div><div class="mh-folio"><b>04</b> / 13</div>
+      <div class="rule"></div>
+      <h2 class="h2 up" style="grid-column:1 / 11;margin-top:30px">We own the transaction, <span class="a">not the trucks.</span></h2>
+      <div class="rule hair" style="margin-top:30px"></div>
+      <div class="up d1" style="grid-column:1 / 5;margin-top:26px"><div class="kch">Supply</div><ul class="plist" style="gap:8px"><li>Manufacturers</li><li>Distributors</li><li>Wholesalers</li></ul></div>
+      <div class="up d2" style="grid-column:5 / 9;margin-top:26px;border-left:1px solid var(--line);border-right:1px solid var(--line);padding:0 22px"><div class="kch">The rail</div><div class="wlab" style="font-size:24px;color:var(--accent);margin-bottom:14px">Patasoko</div><ul class="plist" style="gap:8px"><li>Product &amp; Stock</li><li>Point of Sale</li><li>Logistics</li><li>Credit, later</li></ul></div>
+      <div class="up d3" style="grid-column:9 / 13;margin-top:26px"><div class="kch">Demand</div><ul class="plist" style="gap:8px"><li>Retailers</li><li>Kiosks</li><li>Businesses</li></ul></div>
+      <p class="lede up d4" style="grid-column:1 / 11;margin-top:34px">Asset-light from day one. The platform coordinates the chain and keeps the data.</p>
+    </div>
+  </section>
+
+  <!-- 05 GO-TO-MARKET -->
+  <section class="slide" data-label="Go-To-Market">
+    <div class="frame">
+      <div class="mh-brand"><img src="patasoko-logo-dark.png" alt="Patasoko"></div>
+      <div class="mh-sec">Go-To-Market</div><div class="mh-folio"><b>05</b> / 13</div>
+      <div class="rule"></div>
+      <h2 class="h2 up" style="grid-column:1 / 11;margin-top:30px">Sign supply first. <span class="a">Demand follows.</span></h2>
+      <div class="rule hair" style="margin-top:30px"></div>
+      <div class="up d1" style="grid-column:1 / 5;margin-top:26px"><div class="kch">Phase 1 · Supply</div><div class="wlab" style="font-size:21px">Lock the supply side</div><ul class="plist" style="margin-top:12px"><li>Top <b>30 wholesalers</b>, Nairobi and Mombasa</li><li>LOIs with <b>3 logistics partners</b></li><li>Anchors: <b>Bidco, Unilever EA</b></li></ul></div>
+      <div class="up d2" style="grid-column:5 / 9;margin-top:26px"><div class="kch">Phase 2 · Demand</div><div class="wlab" style="font-size:21px">Activate retailers</div><ul class="plist" style="margin-top:12px"><li>Agents from <b>Wasoko, Copia, Twiga</b></li><li>Market-day activations</li><li><b>USSD</b> reach across mobile money</li></ul></div>
+      <div class="up d3" style="grid-column:9 / 13;margin-top:26px"><div class="kch">Phase 3 · Scale</div><div class="wlab" style="font-size:21px">Nairobi to national</div><ul class="plist" style="margin-top:12px"><li><b>Mombasa</b> corridor, then <b>Kisumu</b></li><li>Cross-border at <b>Busia, Malaba</b></li><li><b>PayAssure</b> credit at 6+ months</li></ul></div>
+    </div>
+  </section>
+
+  <!-- 06 PROOF -->
+  <section class="slide" data-label="Network Effect">
+    <div class="frame">
+      <div class="mh-brand"><img src="patasoko-logo-dark.png" alt="Patasoko"></div>
+      <div class="mh-sec">Comparable, OmniRetail</div><div class="mh-folio"><b>06</b> / 13</div>
+      <div class="rule"></div>
+      <div class="eyebrow up" style="grid-column:1 / 8;margin-top:28px">The model works elsewhere</div>
+      <div class="bignum a up d1 countup" style="grid-column:1 / 8;font-size:186px;margin-top:8px">5,800</div>
+      <p class="lede up d2" style="grid-column:1 / 7;margin-top:6px"><b>Distributors onboarded, not displaced</b> by OmniRetail Nigeria. The exact model we are building.</p>
+      <div class="up d2" style="grid-column:8 / 13;margin-top:44px">
+        <div class="drow head"><span class="k">Annual transactions</span><span class="v a">$810M</span></div>
+        <div class="drow"><span class="k">Net profitable since</span><span class="v">2023</span></div>
+        <div class="drow"><span class="k">Raised, Norfund and Goodwell</span><span class="v">$20M</span></div>
+        <div class="drow"><span class="k">Operating model</span><span class="v" style="font-size:16px;color:var(--muted)">Asset-light</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 MARKET -->
+  <section class="slide" data-label="Market">
+    <div class="frame">
+      <div class="mh-brand"><img src="patasoko-logo-dark.png" alt="Patasoko"></div>
+      <div class="mh-sec">Market Opportunity</div><div class="mh-folio"><b>07</b> / 13</div>
+      <div class="rule"></div>
+      <h2 class="h2 up" style="grid-column:1 / 11;margin-top:30px">A <span class="a">$75B</span> market, barely digitised.</h2>
+      <div class="rule hair" style="margin-top:30px"></div>
+      <div class="stat up d1" style="grid-column:1 / 4;margin-top:26px"><div class="lab">East Africa retail</div><div class="num a tnum cur" data-usd="$75B" data-ksh="KSh 9.6T">$75B</div></div>
+      <div class="stat up d2" style="grid-column:4 / 7;margin-top:26px"><div class="lab">Kenya B2B digital</div><div class="num tnum cur" data-usd="$1.2B" data-ksh="KSh 154B">$1.2B</div></div>
+      <div class="stat up d3" style="grid-column:7 / 10;margin-top:26px"><div class="lab">CAGR</div><div class="num tnum">10-15%</div></div>
+      <div class="stat up d4" style="grid-column:10 / 13;margin-top:26px"><div class="lab">Penetration</div><div class="num r tnum">&lt;5%</div></div>
+      <p class="lede up d4" style="grid-column:1 / 11;margin-top:34px;font-size:16px">Wasoko exited Mombasa. MarketForce is dormant. Copia laid off 700+. <b>The first wave burned cash on the wrong model. The demand remains.</b></p>
+    </div>
+  </section>
+
+  <!-- 08 COMPETITION -->
+  <section class="slide" data-label="Competition">
+    <div class="frame">
+      <div class="mh-brand"><img src="patasoko-logo-dark.png" alt="Patasoko"></div>
+      <div class="mh-sec">Competition</div><div class="mh-folio"><b>08</b> / 13</div>
+      <div class="rule"></div>
+      <h2 class="h2 up" style="grid-column:1 / 11;margin-top:30px">We enter at <span class="a">the right moment.</span></h2>
+      <div class="up d1" style="grid-column:1 / 13;margin-top:28px">
+        <div class="crow self"><div class="who">Patasoko</div><p>Asset-light, supplier-first, commission model. Credit added on data.</p><span class="pill go">Launching</span></div>
+        <div class="crow"><div class="who">Wasoko / MaxAB</div><p>Inventory-heavy. Merged under retrenchment pressure.</p><span class="pill mute">Merged</span></div>
+        <div class="crow"><div class="who">MarketForce</div><p>Overextended expansion and cash burn weakened execution.</p><span class="pill mute">Dormant</span></div>
+        <div class="crow"><div class="who">Copia</div><p>Consumer-led, capital-intensive. Wound down 2024.</p><span class="pill mute">Closed</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 09 BUSINESS MODEL -->
+  <section class="slide" data-label="Business Model">
+    <div class="frame">
+      <div class="mh-brand"><img src="patasoko-logo-dark.png" alt="Patasoko"></div>
+      <div class="mh-sec">Business Model</div><div class="mh-folio"><b>09</b> / 13</div>
+      <div class="rule"></div>
+      <h2 class="h2 up" style="grid-column:1 / 11;margin-top:30px">Revenue that scales <span class="a">with the network.</span></h2>
+      <div class="up d1" style="grid-column:1 / 7;margin-top:28px">
+        <div class="kch">Core transaction revenue</div>
+        <div class="drow head"><span class="k">GMV Commission</span><span class="v a">1-2%</span></div>
+        <div class="drow"><span class="k">Logistics Margin</span><span class="v a">5-8%</span></div>
+        <div class="drow"><span class="k">BNPL Fee Share<small>once credit is live</small></span><span class="v a">1-2%</span></div>
+        <div class="drow"><span class="k">Featured Listings</span><span class="v" style="font-size:16px;color:var(--muted)">Flat</span></div>
+      </div>
+      <div class="up d2" style="grid-column:7 / 13;margin-top:28px">
+        <div class="kch">Expansion, subscription</div>
+        <div class="drow head"><span class="k">Manufacturer SaaS</span><span class="v a cur" data-usd="$200-500/mo" data-ksh="KSh 26-64K/mo">$200-500/mo</span></div>
+        <div class="drow"><span class="k">POS Module</span><span class="v" style="font-size:16px;color:var(--muted)">Pilot</span></div>
+        <div class="drow"><span class="k">Financial Mgmt</span><span class="v" style="font-size:16px;color:var(--muted)">Pilot</span></div>
+        <div class="drow"><span class="k">Data and Insights</span><span class="v" style="font-size:16px;color:var(--muted)">Later</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 METRIC -->
+  <section class="slide" data-label="The Metric">
+    <div class="frame">
+      <div class="mh-brand"><img src="patasoko-logo-dark.png" alt="Patasoko"></div>
+      <div class="mh-sec">The Metric That Matters</div><div class="mh-folio"><b>10</b> / 13</div>
+      <div class="rule"></div>
+      <h2 class="h1 up" style="grid-column:1 / 12;font-size:64px;margin-top:58px;letter-spacing:-.04em;line-height:1.02">GMV can hide<br>a <span class="a">broken model.</span></h2>
+      <p class="lede up d1" style="grid-column:1 / 9;margin-top:30px;font-size:18px">So we govern the business on one number: <b>contribution margin per order.</b> Every market, every cohort, every expansion decision is gated on it before we scale.</p>
+      <div class="up d2" style="grid-column:1 / 11;margin-top:24px"><span class="mono" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);border-left:3px solid var(--accent);padding-left:12px">North star</span> &nbsp;<b>Positive contribution margin per order, by month 12.</b></div>
+    </div>
+  </section>
+
+  <!-- 11 THE ASK -->
+  <section class="slide" data-label="The Ask">
+    <div class="frame">
+      <div class="mh-brand"><img src="patasoko-logo-dark.png" alt="Patasoko"></div>
+      <div class="mh-sec">The Ask</div><div class="mh-folio"><b>11</b> / 13</div>
+      <div class="rule"></div>
+      <div class="eyebrow up" style="grid-column:1 / 6;margin-top:36px">Pre-Seed</div>
+      <div class="bignum a up d1 tnum cur" data-usd="$250K" data-ksh="KSh 32M" style="grid-column:1 / 7;font-size:150px;margin-top:6px">$250K</div>
+      <p class="lede up d2" style="grid-column:1 / 6;margin-top:10px">An 18-month runway to <b>Seed readiness</b>, kept lean to protect founder and Seed-round ownership.</p>
+      <div class="up d2" style="grid-column:8 / 13;margin-top:50px">
+        <div class="kch">Use of funds</div>
+        <div class="drow head"><span class="k">Tech Platform</span><span class="v a">40%</span></div>
+        <div class="drow"><span class="k">Field Sales and Onboarding</span><span class="v">30%</span></div>
+        <div class="drow"><span class="k">Working Capital</span><span class="v">20%</span></div>
+        <div class="drow"><span class="k">Operations and Legal</span><span class="v">10%</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 TEAM -->
+  <section class="slide" data-label="Team">
+    <div class="frame">
+      <div class="mh-brand"><img src="patasoko-logo-dark.png" alt="Patasoko"></div>
+      <div class="mh-sec">Team</div><div class="mh-folio"><b>12</b> / 13</div>
+      <div class="rule"></div>
+      <h2 class="h2 up" style="grid-column:1 / 11;margin-top:30px">Operators who <span class="a">know this market.</span></h2>
+      <div class="rule hair" style="margin-top:30px"></div>
+      <div class="up d1" style="grid-column:1 / 7;margin-top:18px">
+        <div class="drow head"><span class="k" style="color:var(--ink);font-weight:600">CEO, Co-Founder</span><span class="v" style="font-size:14px;color:var(--muted);font-weight:500">Deep Kenya market</span></div>
+        <div class="drow"><span class="k" style="color:var(--ink);font-weight:600">CTO, Co-Founder</span><span class="v" style="font-size:14px;color:var(--muted);font-weight:500">Product, cross-domain</span></div>
+        <div class="drow"><span class="k" style="color:var(--ink);font-weight:600">Head of Supply, CCO</span><span class="v" style="font-size:14px;color:var(--muted);font-weight:500">Retail, market ties</span></div>
+        <div class="drow"><span class="k" style="color:var(--ink);font-weight:600">COO, Co-Founder</span><span class="v" style="font-size:14px;color:var(--muted);font-weight:500">Runs complex orgs</span></div>
+      </div>
+      <div class="up d2" style="grid-column:7 / 13;margin-top:18px">
+        <div class="drow head"><span class="k" style="color:var(--ink);font-weight:600">Advisor, Marketplace</span><span class="v" style="font-size:14px;color:var(--muted);font-weight:500">Ex Kenya B2B exec</span></div>
+        <div class="drow"><span class="k" style="color:var(--ink);font-weight:600">Advisor, Logistics</span><span class="v" style="font-size:14px;color:var(--muted);font-weight:500">EA route and SLA</span></div>
+        <div class="drow"><span class="k" style="color:var(--ink);font-weight:600">Advisor, Payments</span><span class="v" style="font-size:14px;color:var(--muted);font-weight:500">M-PESA alumni</span></div>
+        <div class="drow"><span class="k" style="color:var(--ink);font-weight:600">Advisor, Capital</span><span class="v" style="font-size:14px;color:var(--muted);font-weight:500">Africa VC</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13 CLOSE -->
+  <section class="slide" data-label="Contact">
+    <div class="frame">
+      <div class="mh-brand"><img src="patasoko-logo-dark.png" alt="Patasoko"></div>
+      <div class="mh-folio">Pre-Seed · <b>2026</b></div>
+      <div class="rule"></div>
+      <div class="eyebrow up" style="grid-column:1 / 8;margin-top:62px">Let's build it together</div>
+      <h2 class="h1 up d1" style="grid-column:1 / 12;font-size:104px;margin-top:14px;letter-spacing:-.05em;line-height:.96">Let's build<br>the <span class="a">rail.</span></h2>
+      <div class="up d2" style="grid-column:1 / 13;margin-top:40px;display:flex;gap:36px;flex-wrap:wrap;font-family:var(--mono);font-size:13px;color:var(--muted)">
+        <span>hello@patasoko.co.ke</span><span>www.patasoko.co.ke</span><span>+254 723 029 273</span><span>+254 723 636 830</span>
+      </div>
+    </div>
+  </section>
+
+</div></div>
+
+<div class="nav">
+  <button id="prev" aria-label="Previous"><svg width="14" height="14" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <div class="dots" id="dots"></div>
+  <button id="next" aria-label="Next"><svg width="14" height="14" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
+  <span class="count" id="count">01 / 13</span>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var deck=document.getElementById('deck');
+  var slides=[].slice.call(deck.querySelectorAll('.slide'));
+  var N=slides.length,i=0;
+  var dotsWrap=document.getElementById('dots'),count=document.getElementById('count');
+  var prev=document.getElementById('prev'),next=document.getElementById('next');
+  function fit(){var s=Math.min(window.innerWidth/1280,window.innerHeight/720);deck.style.transform='scale('+s+')';}
+  window.addEventListener('resize',fit);fit();
+  slides.forEach(function(_,k){var b=document.createElement('button');b.className='dot';b.setAttribute('aria-label','Slide '+(k+1));b.addEventListener('click',function(){go(k);});dotsWrap.appendChild(b);});
+  var dots=[].slice.call(dotsWrap.children);
+  function pad(n){return(n<10?'0':'')+n;}
+
+  function fmt(v,dec,comma){var s=dec>0?v.toFixed(dec):String(Math.round(v));if(comma){var p=s.split('.');p[0]=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,',');s=p.join('.');}return s;}
+  function eo(t){return 1-Math.pow(1-t,4);}
+  function anim(el){var f=(el.textContent||'').trim();var m=f.match(/^([^\d]*?)(\d[\d,]*(?:\.\d+)?)(.*)$/);if(!m)return;var pre=m[1],ns=m[2],su=m[3],c=ns.indexOf(',')>=0,d=(ns.split('.')[1]||'').length,t=parseFloat(ns.replace(/,/g,''));if(!isFinite(t))return;if(el._r)cancelAnimationFrame(el._r);var dur=1100,st=null;function tk(ts){if(st===null)st=ts;var p=Math.min((ts-st)/dur,1);el.textContent=pre+fmt(eo(p)*t,d,c)+su;if(p<1)el._r=requestAnimationFrame(tk);else{el.textContent=pre+fmt(t,d,c)+su;el._r=null;}}el._r=requestAnimationFrame(tk);}
+  function runCounters(s){if(!s)return;[].slice.call(s.querySelectorAll('.countup')).forEach(function(el,x){setTimeout(function(){anim(el);},90*x);});}
+
+  function render(){
+    slides.forEach(function(s,k){s.classList.toggle('is-active',k===i);});
+    dots.forEach(function(d,k){d.classList.toggle('on',k===i);});
+    count.textContent=pad(i+1)+' / '+pad(N);
+    runCounters(slides[i]);
+    try{location.replace('#s'+(i+1));}catch(e){}
+  }
+  function go(n){i=Math.max(0,Math.min(N-1,n));render();}
+  prev.addEventListener('click',function(){go(i-1);});
+  next.addEventListener('click',function(){go(i+1);});
+  window.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){e.preventDefault();go(i+1);}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(i-1);}
+    else if(e.key==='Home'){go(0);}else if(e.key==='End'){go(N-1);}
+  });
+  var sx=0,sy=0,tk=false;
+  deck.addEventListener('touchstart',function(e){var t=e.touches[0];sx=t.clientX;sy=t.clientY;tk=true;},{passive:true});
+  deck.addEventListener('touchend',function(e){if(!tk)return;tk=false;var t=e.changedTouches[0];var dx=t.clientX-sx,dy=t.clientY-sy;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy))go(i+(dx<0?1:-1));},{passive:true});
+
+  function setCur(cur,save){
+    document.querySelectorAll('.cur').forEach(function(el){var v=el.getAttribute('data-'+cur);if(v)el.textContent=v;});
+    document.querySelectorAll('.seg [data-cur]').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-cur')===cur);});
+    if(save){try{localStorage.setItem('pata-sw-cur',cur);}catch(e){}}
+  }
+  document.querySelectorAll('.seg [data-cur]').forEach(function(b){b.addEventListener('click',function(){setCur(b.getAttribute('data-cur'),true);});});
+  function setTheme(t,save){
+    document.documentElement.setAttribute('data-theme',t);
+    var tc=document.querySelector('meta[name=theme-color]');if(tc)tc.setAttribute('content',t==='dark'?'#0A0A0A':'#FFFFFF');
+    document.querySelectorAll('[data-theme-set]').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-theme-set')===t);});
+    if(save){try{localStorage.setItem('pata-sw-theme',t);}catch(e){}}
+  }
+  document.querySelectorAll('[data-theme-set]').forEach(function(b){b.addEventListener('click',function(){setTheme(b.getAttribute('data-theme-set'),true);});});
+
+  var th='light',cu='usd';
+  try{th=localStorage.getItem('pata-sw-theme')||'light';cu=localStorage.getItem('pata-sw-cur')||'usd';}catch(e){}
+  setTheme(th,false);setCur(cu,false);
+  var m=(location.hash||'').match(/^#s(\d+)$/);if(m)i=Math.max(0,Math.min(N-1,parseInt(m[1],10)-1));
+  render();
+})();
+</script>
+</body>
+</html>

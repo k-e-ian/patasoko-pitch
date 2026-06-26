@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Patasoko, East Africa's Trade Rail</title>
+<meta name="theme-color" content="#EEF0F3"/>
+<meta name="robots" content="noindex, nofollow"/>
+<link rel="icon" type="image/png" href="patasoko-logo-dark.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --sans:"Outfit",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+  --ease:cubic-bezier(.34,1.2,.4,1);
+  --r:22px;
+}
+html[data-theme="light"]{
+  --bg:#EAEDF1; --surface:#FFFFFF; --surface2:#F2F5F8; --ink:#181B20; --muted:#69707A; --faint:#A3AAB3;
+  --line:#E7EAEE; --accent:#56B648; --accent2:#3E9A33; --red:#E25C4B;
+  --shadow:0 1px 2px rgba(20,24,28,.04),0 10px 28px rgba(20,24,28,.07);
+}
+html[data-theme="dark"]{
+  --bg:#0C0E10; --surface:#16191D; --surface2:#1B1F23; --ink:#EEF1EE; --muted:#9AA3A0; --faint:#5E6864;
+  --line:rgba(255,255,255,.08); --accent:#4ED36B; --accent2:#4ED36B; --red:#FF7E6B;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 32px rgba(0,0,0,.4);
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);font-family:var(--sans);color:var(--ink);transition:background .4s var(--ease)}
+
+.stage{position:fixed;inset:0;display:grid;place-items:center;background:var(--bg)}
+.deck{position:relative;width:1280px;height:720px;transform-origin:center center}
+
+.slide{position:absolute;inset:0;overflow:hidden;background:var(--bg);color:var(--ink);
+  opacity:0;visibility:hidden;transition:opacity .45s var(--ease);z-index:1;
+  display:flex;flex-direction:column;padding:32px 40px 30px}
+.slide.is-active{opacity:1;visibility:visible;z-index:2}
+
+/* slim head */
+.head{display:flex;align-items:center;justify-content:space-between;flex-shrink:0;margin-bottom:14px;padding:0 4px}
+.head img{height:26px;width:auto;display:block}
+.head .sec{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.head .fol{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--faint)}
+.head .fol b{color:var(--accent)}
+
+/* bento grid */
+.bento{flex:1;min-height:0;display:grid;grid-template-columns:repeat(12,1fr);grid-template-rows:repeat(2,1fr);gap:16px}
+.tile{background:var(--surface);border-radius:var(--r);padding:26px;box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden;position:relative}
+.tile.soft{background:var(--surface2);box-shadow:none}
+.tile.accent{background:var(--accent);color:#fff;box-shadow:0 10px 28px rgba(86,182,72,.28)}
+html[data-theme="dark"] .tile.accent{color:#08220e}
+.tile.center{justify-content:center}
+
+/* tile content */
+.tlabel{font-family:var(--mono);font-size:10.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.tile.accent .tlabel{color:rgba(255,255,255,.85)} html[data-theme="dark"] .tile.accent .tlabel{color:rgba(8,34,14,.7)}
+.tnum{font-variant-numeric:tabular-nums}
+.tval{font-weight:800;font-size:54px;letter-spacing:-.03em;line-height:.95;font-variant-numeric:tabular-nums}
+.tval.sm{font-size:38px}
+.tval.r{color:var(--red)} .tval.a{color:var(--accent)}
+.tdesc{font-size:13px;line-height:1.45;color:var(--muted);margin-top:12px}
+.tile.accent .tdesc{color:rgba(255,255,255,.88)} html[data-theme="dark"] .tile.accent .tdesc{color:rgba(8,34,14,.78)}
+.thead{font-weight:700;font-size:21px;letter-spacing:-.02em;line-height:1.12}
+.tbig{font-weight:800;letter-spacing:-.035em;line-height:1.02}
+.tsub{font-size:14.5px;line-height:1.5;color:var(--muted);margin-top:12px}
+.tsub b{color:var(--ink);font-weight:600}
+.tile.accent .tsub,.tile.accent .tsub b{color:rgba(255,255,255,.92)}
+.u{position:relative;white-space:nowrap}
+.u::after{content:"";position:absolute;left:0;right:0;bottom:-.1em;height:4px;background:var(--accent);border-radius:2px}
+.tile.accent .u::after{background:rgba(255,255,255,.6)}
+
+/* mini list inside tile */
+.mini{display:flex;flex-direction:column;gap:0;margin-top:auto}
+.mini .mrow{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)}
+.mini .mrow:last-child{border-bottom:0}
+.mini .mk{font-size:13.5px;color:var(--muted)}
+.mini .mv{font-family:var(--mono);font-weight:600;font-size:15px;color:var(--accent);white-space:nowrap}
+.mini .mv.mut{color:var(--faint)}
+.chip{align-self:flex-start;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:5px 10px;border-radius:999px;margin-top:auto}
+.chip.go{background:var(--accent);color:#fff} html[data-theme="dark"] .chip.go{color:#08220e}
+.chip.mute{background:var(--surface2);color:var(--faint)}
+.pill-list{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+.pill-list span{font-family:var(--mono);font-size:11px;color:var(--muted);background:var(--surface2);border-radius:999px;padding:7px 12px}
+.tile.accent .pill-list span{background:rgba(255,255,255,.16);color:#fff}
+
+/* logo inside tile */
+.tile .tlogo{height:30px;width:auto;margin-bottom:auto}
+
+/* entrance */
+.up{opacity:0;transform:translateY(16px) scale(.99)}
+.slide.is-active .up{opacity:1;transform:none;transition:opacity .5s var(--ease) var(--d,0s),transform .5s var(--ease) var(--d,0s)}
+@media(prefers-reduced-motion:reduce){.up{opacity:1!important;transform:none!important}}
+
+/* chrome / nav */
+.chrome{position:fixed;top:16px;right:18px;z-index:60;display:flex;gap:8px}
+.seg{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px;box-shadow:var(--shadow);font-family:var(--mono)}
+.seg button{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:11px;font-weight:500;letter-spacing:.04em;padding:7px 12px;border-radius:999px;transition:.18s;text-transform:uppercase}
+.seg button.on{background:var(--accent);color:#fff;font-weight:600} html[data-theme="dark"] .seg button.on{color:#08220e}
+.nav{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:60;display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:7px 12px;box-shadow:var(--shadow)}
+.nav button{width:30px;height:30px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;display:grid;place-items:center;transition:.18s}
+.nav button:hover{border-color:var(--accent);color:var(--accent)}
+.nav .dots{display:flex;gap:6px}
+.nav .dot{width:6px;height:6px;border-radius:999px;background:var(--line);border:0;padding:0;cursor:pointer;transition:.22s}
+.nav .dot.on{background:var(--accent);width:18px}
+.nav .count{font-family:var(--mono);font-size:11.5px;color:var(--muted);min-width:50px;text-align:center}
+
+@media print{
+  @page{size:1280px 720px;margin:0}
+  html,body{overflow:visible}.chrome,.nav{display:none}
+  .stage{display:block;position:static}.deck{transform:none!important}
+  .slide{position:relative;opacity:1!important;visibility:visible!important;page-break-after:always;break-after:page}
+  .up{opacity:1!important;transform:none!important}
+}
+</style>
+</head>
+<body>
+
+<div class="chrome">
+  <div class="seg" aria-label="Currency"><button data-cur="usd" class="on">USD</button><button data-cur="ksh">KSh</button></div>
+  <div class="seg" aria-label="Theme"><button data-theme-set="light" class="on">Bright</button><button data-theme-set="dark">Dark</button></div>
+</div>
+
+<div class="stage"><div class="deck" id="deck">
+
+  <!-- 01 COVER -->
+  <section class="slide" data-label="Cover">
+    <div class="head"><img src="patasoko-logo-dark.png" alt="Patasoko"><span class="sec">B2B Trade Rail</span><span class="fol">Pre-Seed · 2026</span></div>
+    <div class="bento">
+      <div class="tile up" style="grid-column:1 / 8;grid-row:1 / 3;justify-content:center"><div class="tlabel">East Africa's Trade Rail</div><div class="tbig" style="font-size:62px;margin-top:14px">One rail to source, finance and <span class="u">deliver.</span></div><div class="tsub" style="font-size:16px;max-width:42ch">Patasoko connects African retailers to vetted wholesalers with integrated logistics. Supplier-first and asset-light.</div></div>
+      <div class="tile accent up" style="grid-column:8 / 13;grid-row:1 / 2;--d:.06s;justify-content:center"><div class="tlabel">Raising</div><div class="tval tnum cur" data-usd="$250K" data-ksh="KSh 32M" style="margin-top:10px">$250K</div><div class="tdesc">Pre-Seed, 18-month runway</div></div>
+      <div class="tile soft up" style="grid-column:8 / 10;grid-row:2 / 3;--d:.12s;justify-content:center"><div class="tlabel">Base</div><div class="thead" style="font-size:17px;margin-top:8px">Nairobi</div></div>
+      <div class="tile soft up" style="grid-column:10 / 13;grid-row:2 / 3;--d:.16s;justify-content:center"><div class="tlabel">Model</div><div class="thead" style="font-size:17px;margin-top:8px">Supplier-first B2B</div></div>
+    </div>
+  </section>
+
+  <!-- 02 CHALLENGE -->
+  <section class="slide" data-label="The Challenge">
+    <div class="head"><img src="patasoko-logo-dark.png" alt="Patasoko"><span class="sec">The Challenge</span><span class="fol"><b>02</b> / 13</span></div>
+    <div class="bento">
+      <div class="tile up" style="grid-column:1 / 5;grid-row:1 / 3;justify-content:center"><div class="tlabel">The cost of informal trade</div><div class="tbig" style="font-size:34px;margin-top:12px">Huge, but <span class="u">broken.</span></div><div class="tsub">Kenya's 300,000+ informal retailers lose margin every week to three failures.</div></div>
+      <div class="tile up" style="grid-column:5 / 8;grid-row:1 / 2;--d:.06s"><div class="tlabel">Time lost</div><div class="tval tnum" style="margin-top:auto">2-3</div><div class="tdesc">Days a week sourcing stock</div></div>
+      <div class="tile up" style="grid-column:8 / 13;grid-row:1 / 2;--d:.1s"><div class="tlabel">Margin lost</div><div class="tval tnum r" style="margin-top:auto">15-30%</div><div class="tdesc">To opaque pricing and brokers</div></div>
+      <div class="tile soft up" style="grid-column:5 / 9;grid-row:2 / 3;--d:.14s"><div class="tlabel">Credit available</div><div class="tval tnum r" style="margin-top:auto">$0</div><div class="tdesc">For a duka with a clean <span class="cur" data-usd="$150" data-ksh="KES 20,000">$150</span> order</div></div>
+      <div class="tile soft up" style="grid-column:9 / 13;grid-row:2 / 3;--d:.18s"><div class="tlabel">Retailers</div><div class="tval tnum a" style="margin-top:auto">300K+</div><div class="tdesc">Informal, across Kenya</div></div>
+    </div>
+  </section>
+
+  <!-- 03 SOLUTION -->
+  <section class="slide" data-label="Our Solution">
+    <div class="head"><img src="patasoko-logo-dark.png" alt="Patasoko"><span class="sec">Our Solution</span><span class="fol"><b>03</b> / 13</span></div>
+    <div class="bento">
+      <div class="tile up" style="grid-column:1 / 5;grid-row:1 / 3;justify-content:center"><div class="tlabel">One platform, three jobs</div><div class="tbig" style="font-size:40px;margin-top:12px">Order.<br>Finance.<br><span class="u">Deliver.</span></div></div>
+      <div class="tile up" style="grid-column:5 / 9;grid-row:1 / 2;--d:.06s;justify-content:center"><div class="tlabel">Step 01</div><div class="thead" style="margin-top:8px">Order</div><div class="tsub">Source from vetted wholesalers at transparent prices, in minutes.</div></div>
+      <div class="tile up" style="grid-column:9 / 13;grid-row:1 / 2;--d:.1s;justify-content:center"><div class="tlabel" style="color:var(--red)">Step 02 · Later</div><div class="thead" style="margin-top:8px;color:var(--muted)">Finance</div><div class="tsub">BNPL activates once the data underwrites it.</div></div>
+      <div class="tile accent up" style="grid-column:5 / 13;grid-row:2 / 3;--d:.14s;justify-content:center"><div class="tlabel">Step 03</div><div class="thead" style="margin-top:6px;font-size:24px">Deliver, then finance follows the data</div><div class="tsub">Asset-light partner logistics move every order, same or next day, not the other way around.</div></div>
+    </div>
+  </section>
+
+  <!-- 04 HOW IT WORKS -->
+  <section class="slide" data-label="How It Works">
+    <div class="head"><img src="patasoko-logo-dark.png" alt="Patasoko"><span class="sec">How It Works</span><span class="fol"><b>04</b> / 13</span></div>
+    <div class="bento">
+      <div class="tile up" style="grid-column:1 / 6;grid-row:1 / 2;justify-content:center"><div class="tlabel">The network, not a warehouse</div><div class="tbig" style="font-size:30px;margin-top:10px">We own the transaction, <span class="u">not the trucks.</span></div></div>
+      <div class="tile soft up" style="grid-column:6 / 9;grid-row:1 / 2;--d:.06s;justify-content:center"><div class="tlabel">Supply</div><div class="pill-list"><span>Manufacturers</span><span>Distributors</span><span>Wholesalers</span></div></div>
+      <div class="tile soft up" style="grid-column:9 / 13;grid-row:1 / 2;--d:.1s;justify-content:center"><div class="tlabel">Demand</div><div class="pill-list"><span>Retailers</span><span>Kiosks</span><span>Businesses</span></div></div>
+      <div class="tile accent up" style="grid-column:1 / 13;grid-row:2 / 3;--d:.14s;justify-content:center"><div class="tlabel">The rail, Patasoko</div><div class="pill-list" style="margin-top:12px"><span>Product &amp; Stock</span><span>Point of Sale</span><span>Logistics</span><span>Credit, later</span></div><div class="tsub" style="margin-top:14px">Asset-light from day one. The platform coordinates the chain and keeps the data.</div></div>
+    </div>
+  </section>
+
+  <!-- 05 GO-TO-MARKET -->
+  <section class="slide" data-label="Go-To-Market">
+    <div class="head"><img src="patasoko-logo-dark.png" alt="Patasoko"><span class="sec">Go-To-Market</span><span class="fol"><b>05</b> / 13</span></div>
+    <div class="bento">
+      <div class="tile up" style="grid-column:1 / 5;grid-row:1 / 3;justify-content:center"><div class="tlabel">Sequenced, supplier-first</div><div class="tbig" style="font-size:32px;margin-top:12px">Sign supply first. <span class="u">Demand follows.</span></div></div>
+      <div class="tile up" style="grid-column:5 / 13;grid-row:1 / 2;--d:.06s;justify-content:center"><div class="tlabel">Phase 1 · Supply</div><div class="thead" style="margin-top:6px;font-size:18px">Lock the supply side</div><div class="tsub">Top 30 wholesalers in Nairobi and Mombasa, LOIs with 3 logistics partners, anchors Bidco and Unilever EA.</div></div>
+      <div class="tile soft up" style="grid-column:5 / 9;grid-row:2 / 3;--d:.1s;justify-content:center"><div class="tlabel">Phase 2 · Demand</div><div class="thead" style="margin-top:6px;font-size:16px">Activate retailers</div><div class="tsub">Agents, market-day activations, USSD reach.</div></div>
+      <div class="tile soft up" style="grid-column:9 / 13;grid-row:2 / 3;--d:.14s;justify-content:center"><div class="tlabel">Phase 3 · Scale</div><div class="thead" style="margin-top:6px;font-size:16px">Go national</div><div class="tsub">Mombasa corridor, cross-border, PayAssure credit.</div></div>
+    </div>
+  </section>
+
+  <!-- 06 PROOF -->
+  <section class="slide" data-label="Network Effect">
+    <div class="head"><img src="patasoko-logo-dark.png" alt="Patasoko"><span class="sec">Comparable, OmniRetail Nigeria</span><span class="fol"><b>06</b> / 13</span></div>
+    <div class="bento">
+      <div class="tile accent up" style="grid-column:1 / 6;grid-row:1 / 3;justify-content:center"><div class="tlabel">Distributors onboarded</div><div class="tval tnum countup" style="font-size:84px;margin-top:10px">5,800</div><div class="tsub" style="margin-top:14px">Onboarded, not displaced. The exact model we are building, already at scale.</div></div>
+      <div class="tile up" style="grid-column:6 / 13;grid-row:1 / 2;--d:.08s;justify-content:center"><div class="tlabel">OmniRetail, by the numbers</div><div class="mini" style="margin-top:14px"><div class="mrow"><span class="mk">Annual transactions</span><span class="mv">$810M</span></div><div class="mrow"><span class="mk">Series A raised, Norfund and Goodwell</span><span class="mv">$20M</span></div><div class="mrow"><span class="mk">Net profitable since</span><span class="mv mut">2023</span></div></div></div>
+      <div class="tile soft up" style="grid-column:6 / 13;grid-row:2 / 3;--d:.14s;justify-content:center"><div class="tlabel">Operating model</div><div class="thead" style="margin-top:8px">Asset-light, a directional reference, not Patasoko projections</div></div>
+    </div>
+  </section>
+
+  <!-- 07 MARKET -->
+  <section class="slide" data-label="Market">
+    <div class="head"><img src="patasoko-logo-dark.png" alt="Patasoko"><span class="sec">Market Opportunity</span><span class="fol"><b>07</b> / 13</span></div>
+    <div class="bento">
+      <div class="tile accent up" style="grid-column:1 / 5;grid-row:1 / 2;justify-content:center"><div class="tlabel">East Africa retail</div><div class="tval tnum cur" data-usd="$75B" data-ksh="KSh 9.6T" style="margin-top:auto">$75B</div></div>
+      <div class="tile up" style="grid-column:5 / 8;grid-row:1 / 2;--d:.06s"><div class="tlabel">Kenya B2B digital</div><div class="tval tnum sm cur" data-usd="$1.2B" data-ksh="KSh 154B" style="margin-top:auto">$1.2B</div></div>
+      <div class="tile up" style="grid-column:8 / 11;grid-row:1 / 2;--d:.1s"><div class="tlabel">CAGR</div><div class="tval tnum sm" style="margin-top:auto">10-15%</div></div>
+      <div class="tile up" style="grid-column:11 / 13;grid-row:1 / 2;--d:.14s"><div class="tlabel">Online</div><div class="tval tnum sm r" style="margin-top:auto">&lt;5%</div></div>
+      <div class="tile soft up" style="grid-column:1 / 13;grid-row:2 / 3;--d:.18s;justify-content:center"><div class="tlabel">Why now</div><div class="tsub" style="margin-top:8px;font-size:15.5px">Wasoko exited Mombasa. MarketForce is dormant. Copia laid off 700+. <b>The first wave burned cash on the wrong model. The demand remains, and we enter lean.</b></div></div>
+    </div>
+  </section>
+
+  <!-- 08 COMPETITION -->
+  <section class="slide" data-label="Competition">
+    <div class="head"><img src="patasoko-logo-dark.png" alt="Patasoko"><span class="sec">Competition</span><span class="fol"><b>08</b> / 13</span></div>
+    <div class="bento">
+      <div class="tile accent up" style="grid-column:1 / 7;grid-row:1 / 2;justify-content:center"><div class="tlabel">Patasoko</div><div class="thead" style="margin-top:6px;font-size:22px">Asset-light, supplier-first. Credit added on data.</div><span class="chip" style="background:rgba(255,255,255,.18);color:#fff;margin-top:14px">Launching</span></div>
+      <div class="tile up" style="grid-column:7 / 13;grid-row:1 / 2;--d:.06s;justify-content:center"><div class="tlabel">Wasoko / MaxAB</div><div class="tsub" style="margin-top:6px">Inventory-heavy. Merged under retrenchment pressure.</div><span class="chip mute">Merged</span></div>
+      <div class="tile soft up" style="grid-column:1 / 7;grid-row:2 / 3;--d:.1s;justify-content:center"><div class="tlabel">MarketForce</div><div class="tsub" style="margin-top:6px">Overextended expansion and cash burn weakened execution.</div><span class="chip mute">Dormant</span></div>
+      <div class="tile soft up" style="grid-column:7 / 13;grid-row:2 / 3;--d:.14s;justify-content:center"><div class="tlabel">Copia</div><div class="tsub" style="margin-top:6px">Consumer-led, capital-intensive. Wound down 2024.</div><span class="chip mute">Closed</span></div>
+    </div>
+  </section>
+
+  <!-- 09 BUSINESS MODEL -->
+  <section class="slide" data-label="Business Model">
+    <div class="head"><img src="patasoko-logo-dark.png" alt="Patasoko"><span class="sec">Business Model</span><span class="fol"><b>09</b> / 13</span></div>
+    <div class="bento">
+      <div class="tile up" style="grid-column:1 / 5;grid-row:1 / 3;justify-content:center"><div class="tlabel">Revenue scales with the network</div><div class="tbig" style="font-size:30px;margin-top:12px">Lean at launch, <span class="u">layered over time.</span></div></div>
+      <div class="tile up" style="grid-column:5 / 9;grid-row:1 / 3;--d:.06s"><div class="tlabel">Core transaction</div><div class="mini" style="margin-top:12px"><div class="mrow"><span class="mk">GMV Commission</span><span class="mv">1-2%</span></div><div class="mrow"><span class="mk">Logistics Margin</span><span class="mv">5-8%</span></div><div class="mrow"><span class="mk">BNPL Fee Share</span><span class="mv">1-2%</span></div><div class="mrow"><span class="mk">Featured Listings</span><span class="mv mut">Flat</span></div></div></div>
+      <div class="tile soft up" style="grid-column:9 / 13;grid-row:1 / 3;--d:.1s"><div class="tlabel">Expansion</div><div class="mini" style="margin-top:12px"><div class="mrow"><span class="mk">Manufacturer SaaS</span><span class="mv cur" data-usd="$200-500" data-ksh="26-64K">$200-500</span></div><div class="mrow"><span class="mk">POS Module</span><span class="mv mut">Pilot</span></div><div class="mrow"><span class="mk">Financial Mgmt</span><span class="mv mut">Pilot</span></div><div class="mrow"><span class="mk">Data and Insights</span><span class="mv mut">Later</span></div></div></div>
+    </div>
+  </section>
+
+  <!-- 10 METRIC -->
+  <section class="slide" data-label="The Metric">
+    <div class="head"><img src="patasoko-logo-dark.png" alt="Patasoko"><span class="sec">The Metric That Matters</span><span class="fol"><b>10</b> / 13</span></div>
+    <div class="bento">
+      <div class="tile up" style="grid-column:1 / 8;grid-row:1 / 3;justify-content:center"><div class="tlabel">The governing number</div><div class="tbig" style="font-size:44px;margin-top:14px">GMV can hide a <span class="u">broken model.</span></div><div class="tsub" style="font-size:15.5px;max-width:42ch">We govern on one number: <b>contribution margin per order.</b> Every market, cohort and expansion is gated on it before we scale.</div></div>
+      <div class="tile accent up" style="grid-column:8 / 13;grid-row:1 / 3;--d:.08s;justify-content:center"><div class="tlabel">North star</div><div class="thead" style="margin-top:10px;font-size:24px">Positive contribution margin per order</div><div class="tsub" style="margin-top:12px">By month 12, in every market we enter.</div></div>
+    </div>
+  </section>
+
+  <!-- 11 THE ASK -->
+  <section class="slide" data-label="The Ask">
+    <div class="head"><img src="patasoko-logo-dark.png" alt="Patasoko"><span class="sec">The Ask</span><span class="fol"><b>11</b> / 13</span></div>
+    <div class="bento">
+      <div class="tile accent up" style="grid-column:1 / 6;grid-row:1 / 3;justify-content:center"><div class="tlabel">Pre-Seed</div><div class="tval tnum cur countup" data-usd="$250K" data-ksh="KSh 32M" style="font-size:76px;margin-top:10px">$250K</div><div class="tsub" style="margin-top:14px">An 18-month runway to Seed readiness, kept lean to protect founder and Seed-round ownership.</div></div>
+      <div class="tile up" style="grid-column:6 / 9;grid-row:1 / 2;--d:.08s"><div class="tlabel">Tech Platform</div><div class="tval tnum a" style="margin-top:auto;font-size:42px">40%</div></div>
+      <div class="tile up" style="grid-column:9 / 13;grid-row:1 / 2;--d:.12s"><div class="tlabel">Field Sales</div><div class="tval tnum" style="margin-top:auto;font-size:42px">30%</div></div>
+      <div class="tile soft up" style="grid-column:6 / 9;grid-row:2 / 3;--d:.16s"><div class="tlabel">Working Capital</div><div class="tval tnum sm" style="margin-top:auto">20%</div></div>
+      <div class="tile soft up" style="grid-column:9 / 13;grid-row:2 / 3;--d:.2s"><div class="tlabel">Operations</div><div class="tval tnum sm" style="margin-top:auto">10%</div></div>
+    </div>
+  </section>
+
+  <!-- 12 TEAM -->
+  <section class="slide" data-label="Team">
+    <div class="head"><img src="patasoko-logo-dark.png" alt="Patasoko"><span class="sec">Team</span><span class="fol"><b>12</b> / 13</span></div>
+    <div class="bento">
+      <div class="tile up" style="grid-column:1 / 5;grid-row:1 / 3;justify-content:center"><div class="tlabel">Operators first</div><div class="tbig" style="font-size:30px;margin-top:12px">Built by people who <span class="u">know this market.</span></div><div class="tsub">We lived this problem and built the network to solve it.</div></div>
+      <div class="tile up" style="grid-column:5 / 13;grid-row:1 / 2;--d:.06s;justify-content:center"><div class="tlabel">Founders</div><div class="mini" style="margin-top:10px"><div class="mrow"><span class="mk">CEO, Co-Founder</span><span class="mv mut">Deep Kenya market</span></div><div class="mrow"><span class="mk">CTO, Co-Founder</span><span class="mv mut">Product, cross-domain</span></div><div class="mrow"><span class="mk">Head of Supply, CCO</span><span class="mv mut">Retail, market ties</span></div><div class="mrow"><span class="mk">COO, Co-Founder</span><span class="mv mut">Runs complex orgs</span></div></div></div>
+      <div class="tile soft up" style="grid-column:5 / 13;grid-row:2 / 3;--d:.12s;justify-content:center"><div class="tlabel">Advisors</div><div class="pill-list" style="margin-top:12px"><span>Marketplace</span><span>Logistics</span><span>Payments, M-PESA</span><span>Capital, Africa VC</span></div></div>
+    </div>
+  </section>
+
+  <!-- 13 CLOSE -->
+  <section class="slide" data-label="Contact">
+    <div class="head"><img src="patasoko-logo-dark.png" alt="Patasoko"><span class="sec">Contact</span><span class="fol">Pre-Seed · 2026</span></div>
+    <div class="bento">
+      <div class="tile accent up" style="grid-column:1 / 8;grid-row:1 / 3;justify-content:center"><div class="tlabel">Let's build it together</div><div class="tbig" style="font-size:54px;margin-top:12px">Let's build <span class="u">the rail.</span></div><div class="tsub" style="font-size:16px">Focused execution, measured scale, and data-backed growth. Starting in Nairobi.</div></div>
+      <div class="tile up" style="grid-column:8 / 13;grid-row:1 / 3;--d:.08s;justify-content:center"><div class="tlabel">Reach us</div><div class="mini" style="margin-top:12px"><div class="mrow"><span class="mk">Email</span><span class="mv">hello@patasoko.co.ke</span></div><div class="mrow"><span class="mk">Web</span><span class="mv">patasoko.co.ke</span></div><div class="mrow"><span class="mk">Phone</span><span class="mv mut">+254 723 029 273</span></div></div></div>
+    </div>
+  </section>
+
+</div></div>
+
+<div class="nav">
+  <button id="prev" aria-label="Previous"><svg width="14" height="14" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <div class="dots" id="dots"></div>
+  <button id="next" aria-label="Next"><svg width="14" height="14" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
+  <span class="count" id="count">01 / 13</span>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var deck=document.getElementById('deck');
+  var slides=[].slice.call(deck.querySelectorAll('.slide'));
+  var N=slides.length,i=0;
+  var dotsWrap=document.getElementById('dots'),count=document.getElementById('count');
+  var prev=document.getElementById('prev'),next=document.getElementById('next');
+  function fit(){var s=Math.min(window.innerWidth/1280,window.innerHeight/720);deck.style.transform='scale('+s+')';}
+  window.addEventListener('resize',fit);fit();
+  slides.forEach(function(_,k){var b=document.createElement('button');b.className='dot';b.setAttribute('aria-label','Slide '+(k+1));b.addEventListener('click',function(){go(k);});dotsWrap.appendChild(b);});
+  var dots=[].slice.call(dotsWrap.children);
+  function pad(n){return(n<10?'0':'')+n;}
+
+  function fmt(v,dec,comma){var s=dec>0?v.toFixed(dec):String(Math.round(v));if(comma){var p=s.split('.');p[0]=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,',');s=p.join('.');}return s;}
+  function eo(t){return 1-Math.pow(1-t,4);}
+  function anim(el){var f=(el.textContent||'').trim();var m=f.match(/^([^\d]*?)(\d[\d,]*(?:\.\d+)?)(.*)$/);if(!m)return;var pre=m[1],ns=m[2],su=m[3],c=ns.indexOf(',')>=0,d=(ns.split('.')[1]||'').length,t=parseFloat(ns.replace(/,/g,''));if(!isFinite(t))return;if(el._r)cancelAnimationFrame(el._r);var dur=1200,st=null;function tk(ts){if(st===null)st=ts;var p=Math.min((ts-st)/dur,1);el.textContent=pre+fmt(eo(p)*t,d,c)+su;if(p<1)el._r=requestAnimationFrame(tk);else{el.textContent=pre+fmt(t,d,c)+su;el._r=null;}}el._r=requestAnimationFrame(tk);}
+  function runCounters(s){if(!s)return;[].slice.call(s.querySelectorAll('.countup')).forEach(function(el,x){setTimeout(function(){anim(el);},90*x);});}
+
+  function render(){
+    slides.forEach(function(s,k){s.classList.toggle('is-active',k===i);});
+    dots.forEach(function(d,k){d.classList.toggle('on',k===i);});
+    count.textContent=pad(i+1)+' / '+pad(N);
+    runCounters(slides[i]);
+    try{location.replace('#s'+(i+1));}catch(e){}
+  }
+  function go(n){i=Math.max(0,Math.min(N-1,n));render();}
+  prev.addEventListener('click',function(){go(i-1);});
+  next.addEventListener('click',function(){go(i+1);});
+  window.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){e.preventDefault();go(i+1);}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(i-1);}
+    else if(e.key==='Home'){go(0);}else if(e.key==='End'){go(N-1);}
+  });
+  var sx=0,sy=0,tk=false;
+  deck.addEventListener('touchstart',function(e){var t=e.touches[0];sx=t.clientX;sy=t.clientY;tk=true;},{passive:true});
+  deck.addEventListener('touchend',function(e){if(!tk)return;tk=false;var t=e.changedTouches[0];var dx=t.clientX-sx,dy=t.clientY-sy;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy))go(i+(dx<0?1:-1));},{passive:true});
+
+  function setCur(cur,save){
+    document.querySelectorAll('.cur').forEach(function(el){var v=el.getAttribute('data-'+cur);if(v)el.textContent=v;});
+    document.querySelectorAll('.seg [data-cur]').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-cur')===cur);});
+    if(save){try{localStorage.setItem('pata-so-cur',cur);}catch(e){}}
+  }
+  document.querySelectorAll('.seg [data-cur]').forEach(function(b){b.addEventListener('click',function(){setCur(b.getAttribute('data-cur'),true);});});
+  function setTheme(t,save){
+    document.documentElement.setAttribute('data-theme',t);
+    var tc=document.querySelector('meta[name=theme-color]');if(tc)tc.setAttribute('content',t==='dark'?'#0C0E10':'#EAEDF1');
+    document.querySelectorAll('[data-theme-set]').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-theme-set')===t);});
+    if(save){try{localStorage.setItem('pata-so-theme',t);}catch(e){}}
+  }
+  document.querySelectorAll('[data-theme-set]').forEach(function(b){b.addEventListener('click',function(){setTheme(b.getAttribute('data-theme-set'),true);});});
+
+  var th='light',cu='usd';
+  try{th=localStorage.getItem('pata-so-theme')||'light';cu=localStorage.getItem('pata-so-cur')||'usd';}catch(e){}
+  setTheme(th,false);setCur(cu,false);
+  var m=(location.hash||'').match(/^#s(\d+)$/);if(m)i=Math.max(0,Math.min(N-1,parseInt(m[1],10)-1));
+  render();
+})();
+</script>
+</body>
+</html>
