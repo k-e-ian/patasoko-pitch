@@ -27,7 +27,7 @@ html[data-theme="dark"]{
 }
 html,body{height:100%;overflow:hidden;background:var(--paper);font-family:var(--serif);color:var(--ink);transition:background .35s var(--ease)}
 
-.stage{position:fixed;inset:0;display:grid;place-items:center;background:var(--paper)}
+.stage{position:fixed;inset:0;overflow:hidden;display:grid;grid-template:100% / 100%;place-items:center;background:var(--paper)}
 .deck{position:relative;width:1280px;height:720px;transform-origin:center center}
 
 .slide{position:absolute;inset:0;overflow:hidden;background:var(--paper);color:var(--ink);
@@ -159,6 +159,11 @@ html,body{height:100%;overflow:hidden;background:var(--paper);font-family:var(--
   .stage,.nav,.chrome{display:none}
 }
 @media (prefers-reduced-motion:reduce){.rotate-hint .ri{animation:none}}
+
+@media (max-height:520px){
+  .chrome{top:6px;right:8px;transform:scale(.66);transform-origin:top right}
+  .nav{bottom:7px;gap:9px;padding:5px 9px;transform:translateX(-50%) scale(.8);transform-origin:bottom center}
+}
 
 @media print{
   @page{size:1280px 720px;margin:0}
@@ -508,7 +513,7 @@ html,body{height:100%;overflow:hidden;background:var(--paper);font-family:var(--
   var N=slides.length,i=0;
   var dotsWrap=document.getElementById('dots'),count=document.getElementById('count');
   var prev=document.getElementById('prev'),next=document.getElementById('next');
-  function fit(){var s=Math.min(window.innerWidth/1280,window.innerHeight/720);deck.style.transform='scale('+s+')';}
+  function fit(){var w=window.innerWidth,h=window.innerHeight,sm=h<520;var rt=sm?33:0,rb=sm?45:0;var s=Math.min(w/1280,(h-rt-rb)/720);deck.style.transform='translateY('+((rt-rb)/2)+'px) scale('+s+')';}
   window.addEventListener('resize',fit);window.addEventListener('orientationchange',function(){setTimeout(fit,120);});fit();
   slides.forEach(function(_,k){var b=document.createElement('button');b.className='dot';b.setAttribute('aria-label','Slide '+(k+1));b.addEventListener('click',function(){go(k);});dotsWrap.appendChild(b);});
   var dots=[].slice.call(dotsWrap.children);
