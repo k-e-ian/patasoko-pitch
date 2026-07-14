@@ -1,8 +1,33 @@
 <!DOCTYPE html>
+<!--
+  Patasoko pitch deck — "editorial" (broadsheet) edition. Self-contained static file.
+  Canonical copy. Folds in the mobile-tuned refinements (transient chrome,
+  safe-area insets, centered scaling, drop-cap + embedded logo) and shrinks the
+  touch controls for an immersive read. editorial-mobile.html is kept as a reference.
+
+  Viewer behaviour:
+  - Slides are authored at a fixed 1280×720 and scaled to the viewport by fit()
+    (translate(-50%,-50%) + scale). Never lay out slides responsively; scale wins.
+    Fine-pointer (desktop) fit reserves 25px top+bottom: chrome may overlap the
+    deck's empty padding but never slide content. Touch fit overscans 6% past the
+    viewport — the crop stays inside the slides' empty padding (chrome fades instead).
+  - The logo is embedded as a base64 data URI (assigned by JS at startup), so the
+    .html file renders correctly when shared on its own, without the sibling PNG.
+  - Navigation: arrow keys / space (desktop), swipe (touch), prev/next + dots (both).
+    Deep-linkable via #s<n> hash. Theme (light/dark) and currency (USD/KSh)
+    persist in localStorage (pata-ed-theme / pata-ed-cur).
+  - Mobile portrait (≤640px, coarse pointer): a full-screen "rotate to landscape"
+    prompt replaces the deck — pure CSS media query, so rotating dismisses it with
+    no JS. "Continue in portrait" opts out for the session (html.rotate-ok).
+  - Touch devices: chrome (toggles + nav) auto-fades after 3s idle, any tap recalls
+    it (html.ui-idle); a 3px progress hairline at the bottom is the only persistent
+    indicator. Desktop chrome is always visible.
+  - Print (Ctrl+P): one slide per 1280×720 page, chrome hidden.
+-->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>Patasoko, The Trade Rail Dispatch</title>
 <meta name="theme-color" content="#FAF8F2"/>
 <meta name="robots" content="noindex, nofollow"/>
@@ -27,8 +52,11 @@ html[data-theme="dark"]{
 }
 html,body{height:100%;overflow:hidden;background:var(--paper);font-family:var(--serif);color:var(--ink);transition:background .35s var(--ease)}
 
-.stage{position:fixed;inset:0;overflow:hidden;display:grid;grid-template:100% / 100%;place-items:center;background:var(--paper)}
-.deck{position:relative;width:1280px;height:720px;transform-origin:center center}
+.stage{position:fixed;inset:0;background:var(--paper)}
+/* centered via left/top 50% + translate in the fit() transform — grid place-items:center
+   start-aligns items that overflow the viewport (small screens), shifting the deck off-center */
+.deck{position:absolute;left:50%;top:50%;width:1280px;height:720px;transform-origin:center center;transform:translate(-50%,-50%)}
+/* was: .stage{...;display:grid;place-items:center;...} .deck{position:relative;...} */
 
 .slide{position:absolute;inset:0;overflow:hidden;background:var(--paper);color:var(--ink);
   opacity:0;visibility:hidden;transition:opacity .45s var(--ease);z-index:1;
@@ -63,13 +91,17 @@ html,body{height:100%;overflow:hidden;background:var(--paper);font-family:var(--
 .cols{column-gap:34px;column-rule:1px solid var(--rule)}
 .c2{column-count:2}.c3{column-count:3}
 .cols p{margin-bottom:11px;break-inside:avoid}
-.dropcap::first-letter{font-family:var(--serif);font-weight:600;font-size:74px;line-height:.72;float:left;margin:6px 10px 0 0;color:var(--accent)}
+/* three-line drop cap: sized/offset so the cap top sits on line 1's cap height and
+   its baseline on line 3's baseline (prose = 16px/1.55 → 24.8px lines) */
+.dropcap::first-letter{font-family:var(--serif);font-weight:600;font-size:83px;line-height:.72;float:left;margin:18px 12px -12px 0;color:var(--accent)}
+/* was: font-size:74px;...;margin:6px 10px 0 0 — cap floated above line 1 and short of line 3 */
 
 /* grid columns (manual) */
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:0}
 .grid3 .col{padding:0 26px;border-left:1px solid var(--rule)}
 .grid3 .col:first-child{padding-left:0;border-left:0}
 .colhead{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+.grid3.center-cols .col{text-align:center}
 .colnum{font-family:var(--serif);font-weight:600;font-size:15px;color:var(--ink);margin-bottom:8px}
 
 /* by the numbers box */
@@ -86,7 +118,7 @@ html,body{height:100%;overflow:hidden;background:var(--paper);font-family:var(--
 
 /* stat strip */
 .stripn{display:grid;grid-template-columns:repeat(4,1fr);border-top:2px solid var(--ink);border-bottom:1px solid var(--ink)}
-.stripn .s{padding:20px 22px 20px 0;border-right:1px solid var(--rule)}
+.stripn .s{padding:20px 22px;border-right:1px solid var(--rule);text-align:center}
 .stripn .s:last-child{border-right:0}
 .stripn .num{font-family:var(--serif);font-weight:600;font-size:50px;letter-spacing:-.025em;line-height:.9;font-variant-numeric:tabular-nums}
 .stripn .s.k .num{color:var(--accent)} .stripn .num.r{color:var(--red)}
@@ -125,7 +157,10 @@ html,body{height:100%;overflow:hidden;background:var(--paper);font-family:var(--
 .nameplate{text-align:center;flex-shrink:0}
 .nameplate img{height:40px;width:auto;display:inline-block}
 .np-rule{border-top:3px solid var(--ink);border-bottom:1px solid var(--ink);height:6px;margin:14px 0}
-.np-date{display:flex;justify-content:space-between;font-family:var(--sans);font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:0 2px}
+.np-date{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;font-family:var(--sans);font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:0 2px}
+.np-date span:nth-child(1){text-align:left}
+.np-date span:nth-child(2){text-align:center}
+.np-date span:nth-child(3){text-align:right}
 
 /* entrance */
 .up{opacity:0;transform:translateY(13px)}
@@ -147,28 +182,58 @@ html,body{height:100%;overflow:hidden;background:var(--paper);font-family:var(--
 .nav .dot.on{background:var(--accent);width:18px}
 .nav .count{font-family:var(--sans);font-size:11.5px;color:var(--muted);min-width:52px;text-align:center}
 
-/* Portrait mobile: a fixed 16:9 deck shrinks to an unreadable band, so we
-   ask for landscape instead of reflowing every absolutely-positioned slide. */
-.rotate-hint{position:fixed;inset:0;z-index:200;display:none;place-items:center;background:var(--paper);color:var(--ink);text-align:center;padding:34px}
-.rotate-hint .ri{width:46px;height:46px;color:var(--accent);transform-origin:center;animation:rh-rock 2.8s var(--ease) infinite}
-.rotate-hint .rt{font-family:var(--serif);font-size:27px;font-weight:500;letter-spacing:-.01em;margin-top:24px}
-.rotate-hint .rs{font-family:var(--sans);font-size:13px;line-height:1.5;letter-spacing:.02em;color:var(--muted);margin:10px auto 0;max-width:30ch}
-@keyframes rh-rock{0%,58%,100%{transform:rotate(0)}30%{transform:rotate(-90deg)}}
-@media (max-width:600px) and (orientation:portrait){
-  .rotate-hint{display:grid}
-  .stage,.nav,.chrome{display:none}
+/* ===== rotate prompt (phone portrait) ===== */
+.rotate{position:fixed;inset:0;z-index:100;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:var(--paper);color:var(--ink);padding:36px 28px}
+.rotate .ric{width:52px;height:82px;border:2px solid var(--ink);border-radius:9px;position:relative;margin-bottom:28px;animation:rturn 1.4s var(--ease) .6s forwards}
+.rotate .ric::after{content:"";position:absolute;left:0;right:0;bottom:7px;margin:0 auto;width:14px;height:3px;background:var(--ink);border-radius:2px}
+@keyframes rturn{to{transform:rotate(90deg)}}
+@media(prefers-reduced-motion:reduce){.rotate .ric{animation:none;transform:rotate(90deg)}}
+.rotate .rk{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--accent)}
+.rotate h2{font-family:var(--serif);font-weight:600;font-size:34px;letter-spacing:-.015em;line-height:1.05;margin-top:12px}
+.rotate h2 em{font-style:italic;color:var(--accent)}
+.rotate .rrule{width:min(300px,70vw);border-top:2px solid var(--ink);border-bottom:1px solid var(--ink);height:5px;margin:18px 0 14px}
+.rotate p{font-family:var(--serif);font-style:italic;font-size:16px;line-height:1.5;color:var(--muted);max-width:30ch}
+.rotate button{margin-top:32px;font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:transparent;border:1px solid var(--rule);border-radius:2px;padding:13px 18px;cursor:pointer}
+/* shows only on small touch screens held upright; rotating the phone hides it with no JS */
+@media (orientation:portrait) and (pointer:coarse) and (max-width:640px){
+  html:not(.rotate-ok) .rotate{display:flex}
+  html:not(.rotate-ok) .chrome,html:not(.rotate-ok) .nav{display:none}
 }
-@media (prefers-reduced-motion:reduce){.rotate-hint .ri{animation:none}}
-
-@media (max-height:520px){
-  .chrome{top:6px;right:8px;transform:scale(.66);transform-origin:top right}
-  .nav{bottom:7px;gap:9px;padding:5px 9px;transform:translateX(-50%) scale(.8);transform-origin:bottom center}
+/* touch: swipe is the primary nav and the chrome auto-fades, so keep the toggles
+   + slider SMALL and unobtrusive for an immersive, edge-to-edge read on a phone.
+   Still tap-safe (~30px hit area) and clear of notches / home bars. Scoped to
+   coarse pointers only, so the desktop layout is unchanged. */
+@media (pointer:coarse){
+  .runhead .fol{visibility:hidden} /* redundant with the bottom slider count + progress bar; frees the top-right corner for the toggles */
+  /* The deck fills the width, so its masthead + footrule reach the screen edges,
+     right where this fixed chrome floats. Reserving space would shrink the deck;
+     instead the chrome is a light, video-player-style OVERLAY that auto-fades to a
+     pristine spread. Keep it airy so the visible window doesn't look broken: a
+     soft-tint active state (not a heavy green block), a whisper shadow to read as a
+     floating layer over the rule, snug to the corners. */
+  .seg{padding:2px;box-shadow:0 1px 7px rgba(21,18,13,.12)}
+  .seg button{padding:5px 8px;font-size:9px;letter-spacing:.02em}
+  .seg button.on,html[data-theme="dark"] .seg button.on{background:var(--acc-soft);color:var(--accent)}
+  .chrome{top:max(6px,env(safe-area-inset-top));right:max(6px,env(safe-area-inset-right));gap:5px}
+  .nav{bottom:max(7px,env(safe-area-inset-bottom));gap:7px;padding:4px 7px;box-shadow:0 1px 7px rgba(21,18,13,.12);transform:translateX(-50%) scale(.8);transform-origin:bottom center}
+  .nav button{width:26px;height:26px}
+  .nav .dot{width:5px} .nav .dot.on{width:13px}
+  .nav .count{font-size:10px;min-width:36px}
+}
+/* touch: transient chrome (video-player pattern) — swipe is primary nav, so the
+   buttons fade after 3s idle and any tap recalls them; a hairline progress bar
+   stays as the only persistent signal */
+.prog{display:none;position:fixed;left:0;bottom:0;height:3px;background:var(--accent);z-index:59;transition:width .3s var(--ease)}
+@media (pointer:coarse){
+  .prog{display:block}
+  .chrome,.nav{transition:opacity .3s var(--ease)}
+  html.ui-idle .chrome,html.ui-idle .nav{opacity:0;pointer-events:none}
 }
 
 @media print{
   @page{size:1280px 720px;margin:0}
   html,body{overflow:visible}.chrome,.nav{display:none}
-  .stage{display:block;position:static}.deck{transform:none!important}
+  .stage{display:block;position:static}.deck{position:static;transform:none!important}
   .slide{position:relative;opacity:1!important;visibility:visible!important;page-break-after:always;break-after:page}
   .up{opacity:1!important;transform:none!important}
 }
@@ -181,24 +246,23 @@ html,body{height:100%;overflow:hidden;background:var(--paper);font-family:var(--
 .finrow .fv{font-family:var(--serif);font-weight:600;font-size:32px;line-height:1;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums}
 .finrow .fv.a{color:var(--accent)}
 .finrow .fv.sm{font-family:var(--sans);font-size:14px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.finrow .fv-note{font-family:var(--sans);font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--red);margin-right:9px}
 </style>
 </head>
 <body>
 
+<div class="rotate" role="dialog" aria-label="Rotate your phone to landscape">
+  <div class="ric" aria-hidden="true"></div>
+  <div class="rk">The Trade Rail Dispatch</div>
+  <h2>Best read <em>broadside.</em></h2>
+  <div class="rrule" aria-hidden="true"></div>
+  <p>This edition is laid out in landscape. Turn your phone sideways for the full spread.</p>
+  <button id="rotate-skip">Continue in portrait →</button>
+</div>
+
 <div class="chrome">
   <div class="seg" aria-label="Currency"><button data-cur="usd" class="on">USD</button><button data-cur="ksh">KSh</button></div>
   <div class="seg" aria-label="Theme"><button data-theme-set="light" class="on">Bright</button><button data-theme-set="dark">Dark</button></div>
-</div>
-
-<div class="rotate-hint" role="dialog" aria-label="Rotate your device">
-  <div>
-    <svg class="ri" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <rect x="7" y="2.5" width="10" height="19" rx="2.2"/>
-      <line x1="10.4" y1="18.6" x2="13.6" y2="18.6"/>
-    </svg>
-    <div class="rt">Rotate your phone</div>
-    <div class="rs">This deck is designed in landscape. Turn your device sideways for the full view.</div>
-  </div>
 </div>
 
 <div class="stage"><div class="deck" id="deck">
@@ -271,10 +335,10 @@ html,body{height:100%;overflow:hidden;background:var(--paper);font-family:var(--
     <div class="body">
       <div class="kicker up">The network, not a warehouse</div>
       <h2 class="hed up d1" style="font-size:50px;margin-top:10px">We own the transaction, <em>not the trucks.</em></h2>
-      <div class="grid3 up d2" style="margin-top:26px">
-        <div class="col"><div class="colhead">Supply</div><p class="prose muted" style="font-size:15px;line-height:1.7">Manufacturers<br>Distributors<br>Wholesalers</p></div>
+      <div class="grid3 center-cols up d2" style="margin-top:26px">
+        <div class="col" style="padding-top:18px"><div class="colhead">Supply</div><p class="prose muted" style="font-size:15px;line-height:1.7">Manufacturers<br>Distributors<br>Wholesalers</p></div>
         <div class="col" style="background:var(--acc-soft);padding:18px 26px"><div class="colhead">The rail, Patasoko</div><p class="prose" style="font-size:15px;line-height:1.7">Product &amp; Stock<br>Point of Sale<br>Logistics<br>Credit, later</p></div>
-        <div class="col"><div class="colhead">Demand</div><p class="prose muted" style="font-size:15px;line-height:1.7">Retailers<br>Kiosks<br>Businesses</p></div>
+        <div class="col" style="padding-top:18px"><div class="colhead">Demand</div><p class="prose muted" style="font-size:15px;line-height:1.7">Retailers<br>Kiosks<br>Businesses</p></div>
       </div>
       <p class="deckline up d3" style="margin-top:22px">Asset-light from day one. The platform coordinates the chain and keeps the data.</p>
     </div>
@@ -419,7 +483,7 @@ html,body{height:100%;overflow:hidden;background:var(--paper);font-family:var(--
           <span class="fk">Revenue</span>
           <span class="fv a cur" data-usd="$67K" data-ksh="KSh 8.6M">$67K</span>
           <span class="fv a cur" data-usd="$699K" data-ksh="KSh 89M">$699K</span>
-          <span class="fv a cur" data-usd="SOM: $5.5M" data-ksh="SOM: KSh 704M">SOM: $5.5M</span>
+          <span class="fv a"><span class="fv-note">SOM</span><span class="cur" data-usd="$5.5M" data-ksh="KSh 704M">$5.5M</span></span>
         </div>
         <div class="finrow norule">
           <span class="fk">Fundraising</span>
@@ -504,6 +568,7 @@ html,body{height:100%;overflow:hidden;background:var(--paper);font-family:var(--
   <button id="next" aria-label="Next"><svg width="14" height="14" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
   <span class="count" id="count">01 / 14</span>
 </div>
+<div class="prog" id="prog" aria-hidden="true"></div>
 
 <script>
 (function(){
@@ -513,8 +578,28 @@ html,body{height:100%;overflow:hidden;background:var(--paper);font-family:var(--
   var N=slides.length,i=0;
   var dotsWrap=document.getElementById('dots'),count=document.getElementById('count');
   var prev=document.getElementById('prev'),next=document.getElementById('next');
-  function fit(){var w=window.innerWidth,h=window.innerHeight,sm=h<520;var rt=sm?33:0,rb=sm?45:0;var s=Math.min(w/1280,(h-rt-rb)/720);deck.style.transform='translateY('+((rt-rb)/2)+'px) scale('+s+')';}
-  window.addEventListener('resize',fit);window.addEventListener('orientationchange',function(){setTimeout(fit,120);});fit();
+  // logo embedded as a data URI so the deck renders when the .html is shared alone
+  // (the relative patasoko-logo-dark.png only resolves next to the original file)
+  var LOGO='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAYwAAAB4CAMAAADWkzXDAAAAY1BMVEVelVJQqD9ZpktaoktcnU9YrklYqEpXqklVr0hbqU1brE1arkxYrUlXtkhTtUNWsUZbp01YpEhmsVdYuEZYtkpUuEVWtkhYtEpZuUtZs0tXtUlbt01Vt0datEtatkpZuEdZuEu/syYtAAAAE3RSTlMAY4lNKdCZrby42eW9/u7iwWi+lcCwzQAAFpFJREFUeNrtfYly2zjTrYmFHhJm/N3LbgCkLEfv/5R/NXZuEmVLcWqGXTXJxLIkAAe9nW6ALy+HHHLIIYcccsgzpGJR+E8P5T8vQvaAqDWAqX96LP95ITA0aq21ff3psfy9IgT3IsRTv0YCEBQI9p9nTmZdnjmzRw2ds0a2Sg3DMCjVSlmzij9p4AQGWamngsFb1ZLIpbw9b2oPGXnTKgBERO03rdYWRiVfn+JhIxj6mWBUoy4EEa3W2CNaEq1a9pfiwRsFAYP4tzHgJjAo+fhR/xHNqAY3F+x7D4aeSt8rWf19cAimojYktSAgsAcvnawe/I1/BgyCoceeRM8RoflhJ/+2yJpLCjHBD9T9mRChfwNZrwfHPB4MfDIYEzPlVB793KyF3msHKPb8Bb5DeHsykKyTnmmz//Gjs4E/oxlj3k+IEGZHxpf+AJr0AKb7m9DgrUYolj5p8kf4kZvOg0ccwNBo9BPB6NJM+jgr1MZoH6acCRkDdnjI3B4SMYvWRGWYqQZZWto+zrw+Bwz8Q2D4GBHAGGOsdRPSELJOAPUdvyF4xVgtpXyEvWPZPRQ+22r9eYYIEGr9HAeu0fx+e+wnFxLBgBFRFTIM2SeiPutf8jsT6To4GbhY+D4YXBUBBulBN9B4uxGsvlw+oraMzwPj+ZoBBiVP6TfnvKplR/YAoCf38av7+uxE69wQeb/vg9FgBgOHtmGVZ0MqVstWOd9HLw0PjgATGPBEMHgAowecxx+iag1ZqODbv64aou3RQfoASy5a9AE4iWRTH0T8yPtwIty/ZVbXvpfAwD8EBmq9DAaFBG18cAXQfXl6okWkLfvZ998Go+q0Aa8asJr/iKpRg7btjlBB8CpUKaqbNGPWjCc68AiGXgPjRUhMoYv+8kI6M6Ut+dlvg8FOtDPo83Bz83Mmh1t6LKpaqq7zo9K6U7K+yjQUoe3zHPh1MF64gmQVvmynSDOgp7DQfBuMBiBmGVfSOlFd/SJR1W0XXY/zMUioXMPjj4BRXQfjhWk9hNfVV5MEZ6ZccvZ9MCTC+M14STDZ+chdu0getCcdiPlp2cYk/7Bm2FUwOKZs98tOw5sp6BG+DYYIYIDWX3XRVTvGsDiI47fAWjDmNGzA8Wcz8A0whEyB5OZWvOn8WgpEoO+/7zMIjKioXwKDy8HH2V43+gwGaYnWaNd50W+B4XKFHexDBuP3ug3OYCxXUrjo3knNVu2tqKqKMxVJSJQ8yvK3XZ7exE/bWOo8nOErZoqi9Uj24oTvjSQX6dzKltkEQ6QZVWsrEKuR6te7pLrXVURugvFmN8Dg7K3t/JwQe9RjWy+Xhw1DN0RiGEbUQ+dlvpQ+uskkh1Zy1V4QGLixN26KYB1OCgTuswpMvNXC7nXx1VuhLbELYUbndrGBOGs7Mn7kj3zUJq/VITOFvgFGY80KGJxJdQacFKOsHd/m38RMP2W4vZU2MEnoKTdAzOGNq9jh0K7s/dp6uuwrTkM0Q9g4cTCDcor4rgawERJjEHFhqgowmskEz/QeAIOXBZnKmcoQB3OIvao3x12AsV6OodnPEw3BlL4Y0HOxMF+/2sx/B6gScZ6AUbUDaCwMhht2D2aoFzuU2UjYom7uC++ENME5fBLanaxDrifIQMpIpQBtMpjv8gKMcp0qZcJq60VC6wiMqdCGQ622QrYMxkY/UJPMVAaj0vih18SimqIhzervgcb8e6K1zpVO0aWFuSxLRLzz7tdZ+LtKkEJiJKah1+/13HxzJrvR9O4Xeph/dsFNFevEpQ+Le62NnFEzpIYZA++iKPfVCMPGNirA2HDgaXUyK13lXT4H3k62lJCXJRI4B0MSFv3ss2gPGFzQkxTdBYYG0ar9nSCicc7BgYjr7xNVO4Q6J2o9XdxCM/I6iVf0uwYRZ6rE5TlXvXpf1A5qT2Xu9W1UlF3XQ9s2vZ4Xho8+LYcFGgDwv/V3b2sG4U3c8LwbwvGTC6dYdRitDYl63dkvwfx7yCEMmxolWBd2j9E4c9QrYLCOfuiwm1kEmjgArs59MBr7dm0It8Ao6JLsMF1NATZWuSSvhZqMh7TUehDLLS9tqctJt7Wrcy9iJmmLyAdc1ryjMadSLp6hN2yabPd7re9zMPpjQjGv+YxKgVPSHvXMeQsJOVkOk7YWwP2PNyhyZRC3wGCpXFPQIUJZp80Wuo4KO2QIk6U6FdEGVxq7ocRjiFKAUfv4yPYdfVzXuUGj21nnJRfOWwBzQf86gLYGOslu6AdvR9eN1IMt9rDgjNWvr3WJDpdhP8DE/62AIVrffutiidmqjUWTzaiko4Zle7Y+oKb3YbMc5Q0wRPvxASGyl8XI6EedrFlId2qvKn4SBYclKsaqikXtMihZRcImi8do+mOuEzE5mCupZqXshbYYFF0JZriuHzW4vWmxiPc4k6MG+/v3NOfmssfAVRU8vAeDLFL0reKfGP0hzrZ5peLQ+h5yZiFYm1Yb9UqTRwYD1yj0ptjWxZulHaZde1y6YNSN7bxwuipkJGBXEzVmdTsx/YIptGFgdkkWV8r48Ddh4d3HdkIVVgc0pN3OG9Wb86nv1etsvLw9OfoGsaDSMhiXsE65Fm/UPPIKllR/fOhmEtCwbPX1suRyNZoS9aA/e6eJ0/JBs2gzpJAIjDNpi3iUwPAe+XMVjGpJzjFMueZKmahqoWy1i0mVHTYSKiF92Nz3EQvB3l0mA2tMFFcGfcyW55x6bfHyGvBNe3ye7bEx1H51f55nSmzIurHU+QgGLjPwSg4f2ieYGic7dMUiVAOG7jcz38tCgTZnl9etgrFCodHmWsQNxctMYax2RxLD/XlZhaPqvOODuGxC9qgNWL3eBUpz8R2LOc9NYFhHofOwH6i6MrP+QiZ25XPpppvYIKxxsc0yGFaWJwLIcjuVGl1Qc5uXI57cZ9Ew/xKhUtfPbj6JpVxzvROCyy7rRjw64dq9VoIlGWI/G9aGS2vOZ8RuK66qA0mF7/EXaHd4E+F2pZCpED93GC9VDDVhbSOJFkLKjuMiZ89gjG0hCntLeu0trcbbReUmckaLAIiCr7Byu8GoznHbb72nkkrbqBm66GWD+XbnyrdT2YAr5c1wPuP75v6ifT91lAEMHUwE033gIOxiweswV1gv3xCb5bHq5yakAIO+zdoY8/tN7tGg4PxmqstS6rEEwx+jyGbitnB1C4yXF14r4vcoxE7blGzXvDeYmZF2dIwFXBKAqNsrU2KRaY/bPoa2WpOZqjrEDxc+4iIoEm1KtlcXTbSBfIPFohbRFC5y4NCgBytfOf8GwZtEQy3B8NsW9xaXhBApOrzaa0W2FCwdaOhzYN/30+EKaYz78jAu5jemvNp/4LuLck9MiKac4r3wNiwWIiw97eDHYfRaKhF2LXXLjNjPVHMKhk5kb3D46DEatxeEGM9Xd5grbc9hCYajrfF2DcJ/mnxXKVK/0fgmHB4QdCKUJhBLFeSdtwpBMbhyrcQ3KF/mfTP0yeUTGD3NQXKZtBaXkLKgQWZLp6vOLQep8OwXZkcCcrCoCyJwq0WWVkJ2gzF2olbdAgzaRPamZvCqaRWVf4Kx3AOGr0upUcNwDr3ztCehyJ6Z3wcY6DDp+rrlDRfIVQ8UcEW7njVDq3agXUuRzZqpazS62oixG00D3lC4AHDmNGZgFOxQ/BuGjVNAnLXkGW0sBulNMFoPhr4GBhWYtA1nXZLNIQR3nLQQTLrcIPpxLKMIIoWJdPSREe/QwE0sXl4k6A/qlwuBS/YZGqxnjfWUYSu+zheq9PvGl8jgkmFOu0cwIAZzWYKF2jhGRt4TYiVoyt8uwfDrqrcbn337TKyGeeY/asa+Yy+8ViG2DaDEt7nAmvrefItNTV/T3mbeWah3RZsb8wzit3Q8MLXe96ctrsa8GYzQpWnUNTCgMBDUUNTJZh2KmHXFNosJl74KBuorYPj2GehTjOqqcXeB8fLC/zeYUAOkP6JqUDnK+REWxmJ6taOXgd5G0zJVBiPlD0EHV/PRFuHkKNtNMP7B3i/aNhgWiTFNZwLalnjAjY/zLgyGIqTMxO0qGL74v5GB1x1RfXGO7gxbDiJ2g0H1BepadIj0yYe7IgBEl0G9uruyHbKtmJ2sKMDwptToX1tgUL84boPx6qBymjH9gOQzoM9tNK7L54pVZYqoG5eGePM+qrZVVzQjtGGsg+FysGDq6dwtDJ1qM795BxiExuh606hHK3jHUJYM25gBmD1N0a530SW89QIMpAMrrsS1ZqY8GBr1Zet7at+5hf0WGGhOuyftCzVhj/T+jIQQbNhikyIY6+01wh08SDVRJd2n8Xf8AhiuThVP6Ie1CGlFAKOx/c6+0ABGzhSjzwiHJOhDz8v5UJud36GboDcWrfe07xtm6rwbDKrzwWfvt0j279XXwBBSn0HHgKyNLLhQXzBTNIjk83Ca46G3z9L2Oxu439ANawmGajsKep1pXzFU0tsohE3NkGB7/ysbYGijd06a2phNUFdos3/PYAxrYOgN1pY5Z+fBKDi+Aozm1ogK4bnOi10EQ5dg6L1HsN4cQ5rY6hjaIkje9D6fMbjiFzwYFL9tUEiiTX0wG6Hth94LRjXieNLOaQzlh1VdDEhXNYMKwSt5hkgtgtNeJRGdxn1gFK3BGYyJZvze+3FTM/WSkj4rvW3w9mrZTFSnzq4N2PkQToJiv5X0wV5zIL2JJzAmwFZ0f8C2A9dU81ypoSa3P1X51FdyJxjvKTKHORjun3L32cQtMEzz8vL/OnS9CBrs4vMY+FYEwI2ojTkb5/jtDTrkY9x5pwDRqf645Az5Cm6AsWqm6hDQ4mzo/j0uupqCcaPxQF2iEzTBWka4/ajY3iM/XsdAxyqrjME2gfFSu0qgQ2SeQHIVwcB1pyFD9LNUnZtNbIvpdnFQdmrxqsF3CcAaGA6nteKStOiTtNm7KEIMjmkKRl1fy56rODoNp6BpvNOmJ2fsZs73dr157wP6wjIYLmi5NOG0YwzbZpSjkHr00Q2uxm1cRZVfkDJ3g5Ht2izKrrzmwbI25w9Yroap7hyNr/5Ps9GkGXqcgiEvVzqHhbS5SyGW9RRRTKDvPGkbXODHkDPwAMZbxCrQxPPyAtMYQs1VCixRvkujfbPxeQMM6gCcg4HhdpVNMMwSDEccIR342wJj6jOE/E3nWTbqpWxIYOho3pyOka+970wis+g7QXn4XsrG6f4hD4bjgn1Eib+m8+Vd7l9bacfp0mZesLo3G58XH6bTETg5ewFtIAznYMgAxrA4TC7aD3TV3XktUahIAE2/hkq41DiimmVfTriFqu/94seFkD2xK3uKlaW0/saOkrV1EHsz5awRBt85j29rNIE6xQULxjNRsdwdtzoKryE7DX8agEAszdVPUF7sLHA/Z5UpaHIjmPuTnM9PdZ16FH1VHlRb3tsnOGsnV2Wl0bHAPt51usa5YbT6d6pn2OCWAxjuch99Mq58Us/eaxKPPUODt6kBdxmH3Q8GVyFl+SxbgF/4/87uCh5nSOemUoKOAcZ8QRqjx+WiC6ZiEddMrV7VUdWbSm7oOyflPzVjrP5HKt+ZHmeTrRtXoX30HjvFfDU9kYpRMyC06gRWyPgOq5nbYEScpsLcZFo9xraSz2XIfjcYwt285SmaIX4RHdtDcw5xEWI9PU7YXBIYqq4cCxlfZuewb8ePdCRCuO7j0ERP5rC4wKAaDJ5NvCTSeolFEGOSbYOy/ywc1rvj+hMXAII2icqLxSXQ+VYdBmhd38u8tSB8ox+Kbt2hHHcg57PPDeMrNZW7waAk6hxoVntuG9qWUpXlDKqbdqr8LmYCLUu6OxI/n17mKjfOg3qjBuG3drhcEj9K/3VKxcExnDTZWnclE0RCKvPupdtnsUS3/6o8dnZVJJO1KSR9CBkMd8on3Fw3NQbOM/QpbDrTjNVA9eRYaMC1nXE/GFzhhe7ACl80nIo76nLhc9L0xod8FMZdJlZQJnJ+sd2osf8E0B8YQ2VCN64tmzexQFlkzGcFysWJhBXsKSqFd1i3mjn6dH1TznLhW/lrKa2ZGqpK4fQoUeYvfbq42lZwPxiUfeZO2MBkGp+NFqs0idtkX6itW90UyFJAkM8TxLC0h8uHs0V94HPj2BtYP5hWwnOGWVr8Fl+5XfoO32JC+0bOodfAoDAj2sXZTmcqXtddzDt2FuBG69MXwKDbXYzVxYe7v4eivDRnC/ns0EzJFNRlCJReB+XbRXWI0VKcapfngaaqgsvDqrEJC8Z9ARWjXtvzpDdZyIvvQp+AQfGtb2lCu/jO6cW0kytRN9pt7s4z3PecTlhYaE1HrwZGjWdZM6c5XG6+9sd3sDzskTY7lQ+sC4pGycM5CffjUzJ67B1/4Rn0UlIbNP5adJbHbuNxlw+v1Ij9mc7kZU0S8nJZgpH7QK3Vs8PjXGbbpItLqTfbrScXuey/hqFSJjS8aX9MwpxbFpKDeO5nSpKJZsxjcnu33F4mGqd4EtHFg9S3F+nobPT8CfRyihGxsODndtlDEVIt0HsyP96eRkcxfBStcBEMnIIRd5nrrJmnV0yBnW4YcpjD9jE2Plhw4SGc7qCquRwhgf07X4nGVDwouTgXwFToUvceuPwywSJ35l+L5BOXgw1H4yYeiFey7dwdkZODhS7f3GBKmG9w6/Xl5nFlLmF09W68lJlPe7lYawDNLF3xDevGWtDLdJu1EY7UhNZeOaAr6rqum9emrpt7ElR335lf964trmmKBwly+FOMTCoda1yz/mx3rcP5DBZUW5w/EpX0zmbe00Ln095aOkyYkgzrD89t9LOEu2T0MideDLONScxUi1gdpJmda6UXXv0rK0VldwvH4HViVG39pLvMRRVvlJv+mG8+DMfd1LLxrJzwtsVzCfxb6rWNki5oJWnW3lx+jgqR8o3TrizmPXCz2XvvOqVZ/9UPXXiU7Lq7mI3OjLn4e/PWet50oUvljujykPulhtiijvhrtSQimL8Ayfi7MP4D2/jHxNPKdKMPLbWa962SFzSU94frJ/66RyP8u4S4Pk/cOFRi853n8Op2oHvyXLcgzK9AOeTx8v+thyFcFGkQR+UeckSXjacMzVG/h148WarhZInmp2ttLIBe8I0QM8OuPvzFc4UrDZ+ni2fq9Br5C8GhvO+vexzyJaGCjznbUxv59Bm/lf799z3V6F8m4kU05CJGfBVEsrgmNwMTOiWc13r0k7MOmQlr5Zu71cuzTZVUFvUKE7/dA3TIo6RS4WxZaufldVt0WHlu+zS0zV/4FLx/mfA2HMYpnxxFd9OrId7HAzefEnDIQ0RIM7qHeo1zhmNC4R1I/AlhvpeF6iLHw6N/WOgaYOoNoP92d4cc8hRxvfs9PeaBbhQ5wPhRqX2x14HRH6z4j0rV+a4xl1U8+gllh9wl3J8MNO5RqefHlFEP+ZqkJqCvPFTgkMcKK1PsfZdUHPIkqYoT+kdY+7MipE5PfMSvP/LxkEdIjf4sVbi096eH858W1mVatj/6C35UeHyklqFn7x1G6idF+CekaKSjM3ddP3LIw4WFDMM9K+ioav+oVMUpqvkNBof8WREyYwFHB/PPymtxLe7uU5WHPEWKqBYPrvZnJT4vw6NxRLU/KnRZ8zli8XoYqZ+Vms4fuZbBI6r9eWH+KU933d1yyLPEPTcQ++GIav8GcY8xuP3UrkP+jFTycBh/j4jd16YecsghhxxyyCGHHHLIIYf86+T/AIFrFQFVOVrNAAAAAElFTkSuQmCC';
+  [].slice.call(document.querySelectorAll('img[src$="patasoko-logo-dark.png"],link[rel="icon"]')).forEach(function(el){if(el.tagName==='LINK')el.href=LOGO;else el.src=LOGO;});
+  // Desktop: fit by height, reserving 50px so the chrome clears slide content.
+  // Touch: a 16:9 deck fit by height into a ~2.2:1 phone leaves huge side gaps, so
+  // fill the WIDTH and let the deck overflow the short height — but clamp the scale
+  // so the vertical crop only ever eats the slide's own top/bottom padding (min
+  // 38px), never the runhead / body / footrule. h/650 is the largest scale where
+  // (720s - h)/2 <= 38s. A true 16:9 phone fills edge-to-edge; wider phones keep
+  // only a thin side gap. The redundant top-right folio number is hidden on touch
+  // (see CSS) so the toggles float over dead space, not the page number.
+  function fit(){
+    var touch=window.matchMedia&&matchMedia('(pointer:coarse)').matches,s;
+    if(touch){
+      s=Math.min(window.innerWidth/1280,window.innerHeight/650);
+    }else{
+      s=Math.min(window.innerWidth/1280,(window.innerHeight-50)/720);
+    }
+    deck.style.transform='translate(-50%,-50%) scale('+s+')';
+  }
+  window.addEventListener('resize',fit);fit();
   slides.forEach(function(_,k){var b=document.createElement('button');b.className='dot';b.setAttribute('aria-label','Slide '+(k+1));b.addEventListener('click',function(){go(k);});dotsWrap.appendChild(b);});
   var dots=[].slice.call(dotsWrap.children);
   function pad(n){return(n<10?'0':'')+n;}
@@ -528,6 +613,7 @@ html,body{height:100%;overflow:hidden;background:var(--paper);font-family:var(--
     slides.forEach(function(s,k){s.classList.toggle('is-active',k===i);});
     dots.forEach(function(d,k){d.classList.toggle('on',k===i);});
     count.textContent=pad(i+1)+' / '+pad(N);
+    document.getElementById('prog').style.width=((i+1)/N*100)+'%';
     runCounters(slides[i]);
     try{location.replace('#s'+(i+1));}catch(e){}
   }
@@ -562,6 +648,21 @@ html,body{height:100%;overflow:hidden;background:var(--paper);font-family:var(--
   setTheme(th,false);setCur(cu,false);
   var m=(location.hash||'').match(/^#s(\d+)$/);if(m)i=Math.max(0,Math.min(N-1,parseInt(m[1],10)-1));
   render();
+
+  // rotate prompt: CSS shows/hides it on orientation; this only handles "continue anyway"
+  document.getElementById('rotate-skip').addEventListener('click',function(){
+    document.documentElement.classList.add('rotate-ok');
+  });
+
+  // transient chrome on touch: fade controls after 3s idle, recall on any tap.
+  // pointer-events:none while hidden means the recall tap can't hit a button.
+  if(window.matchMedia&&matchMedia('(pointer:coarse)').matches){
+    var idleT,root=document.documentElement;
+    var wake=function(){root.classList.remove('ui-idle');clearTimeout(idleT);idleT=setTimeout(function(){root.classList.add('ui-idle');},2200);};
+    document.addEventListener('touchstart',wake,{passive:true});
+    document.addEventListener('click',wake,true);
+    wake();
+  }
 })();
 </script>
 </body>
