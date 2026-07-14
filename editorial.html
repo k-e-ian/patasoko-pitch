@@ -204,6 +204,12 @@ html,body{height:100%;overflow:hidden;background:var(--paper);font-family:var(--
    Still tap-safe (~30px hit area) and clear of notches / home bars. Scoped to
    coarse pointers only, so the desktop layout is unchanged. */
 @media (pointer:coarse){
+  /* The body is vertically centered, so the runhead sits jammed at the top edge
+     under the toggles while slack goes unused below it. Drop it down: the toggles
+     get a clean empty band above the masthead (no collision), the page reads more
+     balanced, and the centered body absorbs the shift. Only affects runhead slides
+     (2-13); the cover/back nameplate pages are untouched. */
+  .runhead{margin-top:58px}
   .runhead .fol{visibility:hidden} /* redundant with the bottom slider count + progress bar; frees the top-right corner for the toggles */
   /* The deck fills the width, so its masthead + footrule reach the screen edges,
      right where this fixed chrome floats. Reserving space would shrink the deck;
